@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Format is checked before gen-l10n so generated (untracked) sources
+      # cannot fail the check.
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Analyze
+        run: flutter analyze
+
+      # Golden tests are pixel-exact only on the platform that generated
+      # them, so they are excluded here.
+      - name: Run tests
+        run: flutter test --exclude-tags golden

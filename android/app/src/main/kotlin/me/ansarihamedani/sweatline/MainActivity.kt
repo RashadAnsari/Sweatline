@@ -1,0 +1,5 @@
+package me.ansarihamedani.sweatline
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()

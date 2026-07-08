@@ -1,0 +1,245 @@
+{
+  "@@locale": "en",
+  "appTitle": "Sweatline",
+
+  "onboardingTitle": "Your trainer",
+  "onboardingIntro": "Answer three questions and your trainer builds a weekly plan for you.",
+  "goalQuestion": "What is your goal?",
+  "goalBuildMuscle": "Build muscle",
+  "goalLoseWeight": "Lose weight",
+  "goalGetFit": "Get fit",
+  "levelQuestion": "How experienced are you?",
+  "levelBeginner": "Beginner",
+  "levelIntermediate": "Intermediate",
+  "levelAdvanced": "Advanced",
+  "daysQuestion": "How many days a week can you train?",
+  "daysOption": "{count} days",
+  "@daysOption": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "createPlanButton": "Build my plan",
+
+  "dayPush": "Push Day",
+  "dayPull": "Pull Day",
+  "dayLegs": "Leg Day",
+  "dayPushB": "Push Day B",
+  "dayPullB": "Pull Day B",
+  "dayLegsB": "Leg Day B",
+  "dayUpperA": "Upper Body A",
+  "dayLowerA": "Lower Body A",
+  "dayUpperB": "Upper Body B",
+  "dayLowerB": "Lower Body B",
+  "dayFullBodyA": "Full Body A",
+  "dayFullBodyB": "Full Body B",
+
+  "muscleChest": "Chest",
+  "muscleBack": "Back",
+  "muscleShoulders": "Shoulders",
+  "muscleArms": "Arms",
+  "muscleLegs": "Legs",
+  "muscleCore": "Core",
+  "muscleCardio": "Cardio",
+  "muscleTraps": "Traps",
+  "muscleLats": "Lats",
+  "muscleUpperBack": "Upper back",
+  "muscleLowerBack": "Lower back",
+  "muscleBiceps": "Biceps",
+  "muscleTriceps": "Triceps",
+  "muscleForearms": "Forearms",
+  "muscleAbs": "Abs",
+  "muscleObliques": "Obliques",
+  "muscleQuads": "Quads",
+  "muscleHamstrings": "Hamstrings",
+  "muscleGlutes": "Glutes",
+  "muscleCalves": "Calves",
+
+  "equipmentBarbell": "Barbell",
+  "equipmentDumbbell": "Dumbbell",
+  "equipmentCable": "Cable",
+  "equipmentMachine": "Machine",
+  "equipmentBodyweight": "Bodyweight",
+
+  "tabToday": "Today",
+  "tabPlan": "Plan",
+  "tabLibrary": "Library",
+  "tabProgress": "Progress",
+
+  "todayWorkoutTitle": "Today's workout",
+  "exerciseCount": "{count, plural, =1{1 exercise} other{{count} exercises}}",
+  "@exerciseCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "estimatedMinutes": "about {minutes} min",
+  "@estimatedMinutes": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "startWorkout": "Start workout",
+  "workoutsThisWeek": "{count, plural, =0{No workouts yet this week} =1{1 workout this week} other{{count} workouts this week}}",
+  "@workoutsThisWeek": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "lastWorkoutOn": "Last workout: {date}",
+  "@lastWorkoutOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "noWorkoutsYet": "No workouts yet. Your trainer is ready when you are.",
+
+  "setsByReps": "{sets} sets x {repsMin}-{repsMax} reps",
+  "@setsByReps": {
+    "placeholders": {
+      "sets": { "type": "int" },
+      "repsMin": { "type": "int" },
+      "repsMax": { "type": "int" }
+    }
+  },
+  "restInfo": "{seconds}s rest",
+  "@restInfo": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "warmupInfo": "{count, plural, =1{1 warm-up set first, about 60% of your working weight} other{{count} warm-up sets first, about 50% then 75% of your working weight}}",
+  "@warmupInfo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sessionWarmup": "Warm up first: 5-10 minutes of easy cardio and some dynamic stretching.",
+  "cardioFinisher": "Trainer's orders: finish with 15-20 minutes of moderate cardio to drive fat loss.",
+  "newPlanButton": "New plan",
+  "newPlanConfirmTitle": "Replace current plan?",
+  "newPlanConfirmBody": "Your workout history is kept. Only the plan is replaced.",
+  "cancel": "Cancel",
+  "replace": "Replace",
+
+  "librarySearchHint": "Search exercises",
+  "libraryEmpty": "No exercises match your search.",
+  "howToTitle": "How to do it",
+  "trainerTipsTitle": "Trainer tips",
+  "primaryMusclesLabel": "Primary",
+  "secondaryMusclesLabel": "Secondary",
+  "diagramFront": "Front",
+  "diagramBack": "Back",
+  "yourHistoryTitle": "Your history",
+  "noHistoryYet": "You haven't logged this exercise yet.",
+
+  "exerciseProgress": "Exercise {current} of {total}",
+  "@exerciseProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "trainerTipFirstTime": "First time doing this. Start light and focus on clean form.",
+  "trainerTipRepeat": "Last time you lifted {weight} {unit}. Aim for that again.",
+  "@trainerTipRepeat": {
+    "placeholders": {
+      "weight": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+  "trainerTipIncrease": "You hit every rep last time. Go up to {weight} {unit}.",
+  "@trainerTipIncrease": {
+    "placeholders": {
+      "weight": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+  "setLabel": "Set {number}",
+  "@setLabel": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "weightFieldLabel": "Weight ({unit}) *",
+  "@weightFieldLabel": {
+    "placeholders": {
+      "unit": { "type": "String" }
+    }
+  },
+  "repsFieldLabel": "Reps *",
+  "weightValidation": "Enter the weight in {unit}, for example 20 or 22.5",
+  "@weightValidation": {
+    "placeholders": {
+      "unit": { "type": "String" }
+    }
+  },
+  "repsValidation": "Enter how many reps you completed as a whole number above 0",
+  "logSetButton": "Log set",
+  "restTitle": "Rest",
+  "skipRest": "Skip rest",
+  "nextExercise": "Next exercise",
+  "finishWorkout": "Finish workout",
+  "workoutSavedMessage": "Workout saved. Good job!",
+  "exitWorkoutTitle": "Quit this workout?",
+  "exitWorkoutBody": "The sets you logged in this session will be lost.",
+  "keepGoing": "Keep going",
+  "quit": "Quit",
+  "setResult": "{weight} {unit} x {reps}",
+  "@setResult": {
+    "placeholders": {
+      "weight": { "type": "String" },
+      "unit": { "type": "String" },
+      "reps": { "type": "int" }
+    }
+  },
+
+  "statThisWeek": "This week",
+  "statTotal": "Total workouts",
+  "strengthProgressTitle": "Strength progress",
+  "historyTitle": "History",
+  "noProgressYet": "Finish your first workout to see your progress here.",
+  "weightWithUnit": "{weight} {unit}",
+  "@weightWithUnit": {
+    "placeholders": {
+      "weight": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+  "deltaWithUnit": "{delta} {unit} since start",
+  "@deltaWithUnit": {
+    "placeholders": {
+      "delta": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+
+  "unitKg": "kg",
+  "unitLb": "lb",
+  "resumeWorkout": "Resume workout",
+  "settingsTitle": "Settings",
+  "settingsUnits": "Weight unit",
+  "settingsAppearance": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "settingsBackup": "Backup",
+  "exportButton": "Copy backup to clipboard",
+  "exportDone": "Backup copied. Paste it somewhere safe.",
+  "importButton": "Restore from clipboard",
+  "importConfirmTitle": "Restore backup?",
+  "importConfirmBody": "This replaces your current plan and workout history with the backup on your clipboard.",
+  "restore": "Restore",
+  "importDone": "Backup restored.",
+  "importFailed": "Your clipboard does not contain a valid Sweatline backup.",
+  "settingsAbout": "About",
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "privacyNote": "All data stays on this device. Nothing is ever uploaded.",
+  "exerciseInfoTooltip": "Exercise details",
+  "settingsTooltip": "Settings"
+}

@@ -1,0 +1,4 @@
+tags:
+  # Golden tests render pixels and are only stable on the platform that
+  # generated them; CI excludes this tag.
+  golden:

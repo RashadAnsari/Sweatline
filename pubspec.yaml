@@ -1,0 +1,40 @@
+name: sweatline
+description: "Personal training app: generates a workout plan, guides you through gym sessions, and tracks progress."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  package_info_plus: ^10.2.0
+  shared_preferences: ^2.5.5
+  wakelock_plus: ^1.6.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+  generate: true
+  fonts:
+    - family: BebasNeue
+      fonts:
+        - asset: assets/fonts/BebasNeue-Regular.ttf
+
+# Launcher icons are generated from assets/icon/app_icon.png, which itself
+# is produced by test/tools/app_icon_test.dart (run with --update-goldens).
+# Regenerate with: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icon/app_icon.png
+  remove_alpha_ios: true
