@@ -5,11 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../exercise_library.dart';
+import '../exercise_poses.dart';
 import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
 import '../models.dart';
+import '../widgets/exercise_figure.dart';
+import '../widgets/page_body.dart';
 import 'exercise_detail_screen.dart';
+import 'workout_summary_screen.dart';
 
 /// Guided workout session: walks through the day's exercises one at a time,
 /// prescribes warm-ups and a target weight, logs every set, and runs the
@@ -42,7 +46,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   Timer? _restTicker;
   bool _initialized = false;
 
-  final _formKey = GlobalKey<FormState>();
+  // One form key per exercise: during the AnimatedSwitcher transition the
+  // outgoing and incoming pages coexist, so a single GlobalKey would be a
+  // duplicate-key crash.
+  late final List<GlobalKey<FormState>> _formKeys = List.generate(
+    widget.planDay.exercises.length,
+    (_) => GlobalKey<FormState>(),
+  );
   final _weightController = TextEditingController();
   final _repsController = TextEditingController();
 
@@ -137,8 +147,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   int? _parseReps(String? value) => int.tryParse((value ?? '').trim());
 
   void _logSet() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKeys[_exerciseIndex].currentState!.validate()) return;
     final unit = StoreScope.of(context).unit;
+    HapticFeedback.lightImpact();
     setState(() {
       _currentSets.add(
         SetLog(
@@ -150,6 +161,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       if (_currentSets.length < _planned.sets) _startRest();
     });
     _saveDraft();
+  }
+
+  /// Adjusts the weight field by [delta] in the display unit.
+  void _bumpWeight(double delta) {
+    final current = _parseNumber(_weightController.text) ?? 0;
+    final next = (current + delta).clamp(0, 999).toDouble();
+    setState(() => _weightController.text = formatWeight(next));
   }
 
   void _startRest() {
@@ -182,27 +200,31 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   Future<void> _finishWorkout() async {
-    final l10n = AppLocalizations.of(context)!;
     final store = StoreScope.of(context);
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    await store.addSession(
-      WorkoutSession(
-        date: DateTime.now(),
-        dayKey: widget.planDay.key,
-        logs: [
-          for (var i = 0; i < _loggedSets.length; i++)
-            if (_loggedSets[i].isNotEmpty)
-              ExerciseLog(
-                exerciseId: widget.planDay.exercises[i].exerciseId,
-                sets: _loggedSets[i],
-              ),
-        ],
+    final session = WorkoutSession(
+      date: DateTime.now(),
+      dayKey: widget.planDay.key,
+      logs: [
+        for (var i = 0; i < _loggedSets.length; i++)
+          if (_loggedSets[i].isNotEmpty)
+            ExerciseLog(
+              exerciseId: widget.planDay.exercises[i].exerciseId,
+              sets: _loggedSets[i],
+            ),
+      ],
+    );
+    await store.addSession(session);
+    await store.clearDraft();
+    HapticFeedback.mediumImpact();
+    navigator.pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => WorkoutSummaryScreen(
+          session: session,
+          duration: DateTime.now().difference(_startedAt),
+        ),
       ),
     );
-    await store.clearDraft();
-    messenger.showSnackBar(SnackBar(content: Text(l10n.workoutSavedMessage)));
-    navigator.pop();
   }
 
   Future<void> _confirmQuit() async {
@@ -305,172 +327,282 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             child: LinearProgressIndicator(value: (_exerciseIndex + 1) / total),
           ),
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (sessionStart) ...[
-              _trainerCard(context, Icons.directions_run, l10n.sessionWarmup),
-              const SizedBox(height: 12),
-            ],
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        body: PageBody(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 280),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0.08, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            ),
+            child: ListView(
+              key: ValueKey(_exerciseIndex),
+              padding: const EdgeInsets.all(16),
               children: [
-                Expanded(
-                  child: Text(
-                    exercise.name,
-                    style: textTheme.headlineMedium!.copyWith(
-                      color: colorScheme.primary,
-                    ),
+                if (sessionStart) ...[
+                  _trainerCard(
+                    context,
+                    Icons.directions_run,
+                    l10n.sessionWarmup,
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.info_outline),
-                  tooltip: l10n.exerciseInfoTooltip,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ExerciseDetailScreen(exercise: exercise),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              '${l10n.setsByReps(_planned.sets, _planned.repsMin, _planned.repsMax)} · '
-              '${l10n.restInfo(_planned.restSeconds)}',
-              style: textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 14),
-            _trainerCard(context, Icons.tips_and_updates, tip),
-            if (_planned.warmupSets > 0 && _currentSets.isEmpty) ...[
-              const SizedBox(height: 8),
-              _trainerCard(
-                context,
-                Icons.local_fire_department,
-                l10n.warmupInfo(_planned.warmupSets),
-              ),
-            ],
-            const SizedBox(height: 8),
-            for (var i = 0; i < _currentSets.length; i++)
-              ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.check_circle, color: colorScheme.primary),
-                title: Text(l10n.setLabel(i + 1)),
-                trailing: Text(
-                  l10n.setResult(
-                    formatKgIn(store.unit, _currentSets[i].weightKg),
-                    unit,
-                    _currentSets[i].reps,
-                  ),
-                  style: textTheme.titleLarge,
-                ),
-              ),
-            const SizedBox(height: 8),
-            if (resting)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Text(
-                        l10n.restTitle.toUpperCase(),
-                        style: textTheme.labelSmall!.copyWith(
-                          letterSpacing: 2.5,
-                        ),
-                      ),
-                      Text(
-                        '$_restSecondsLeft',
-                        style: textTheme.displayLarge!.copyWith(
-                          color: colorScheme.primary,
-                          fontSize: 96,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(
-                        value: _restSecondsLeft / _planned.restSeconds,
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => setState(_stopRest),
-                        child: Text(l10n.skipRest),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else if (!allSetsDone)
-              Form(
-                key: _formKey,
-                child: Column(
+                  const SizedBox(height: 12),
+                ],
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _weightController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: l10n.weightFieldLabel(unit),
-                            ),
-                            validator: (value) {
-                              final weight = _parseNumber(value);
-                              return weight == null || weight < 0
-                                  ? l10n.weightValidation(unit)
-                                  : null;
-                            },
-                          ),
+                    Expanded(
+                      child: Text(
+                        exercise.name,
+                        style: textTheme.headlineMedium!.copyWith(
+                          color: colorScheme.primary,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _repsController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: l10n.repsFieldLabel,
-                            ),
-                            validator: (value) {
-                              final reps = _parseReps(value);
-                              return reps == null || reps <= 0
-                                  ? l10n.repsValidation
-                                  : null;
-                            },
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    FilledButton.icon(
-                      onPressed: _logSet,
-                      icon: const Icon(Icons.check),
-                      label: Text(
-                        '${l10n.logSetButton} ${_currentSets.length + 1}/${_planned.sets}',
+                    IconButton(
+                      icon: const Icon(Icons.info_outline),
+                      tooltip: l10n.exerciseInfoTooltip,
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ExerciseDetailScreen(exercise: exercise),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            if (showCardioFinisher) ...[
-              const SizedBox(height: 8),
-              _trainerCard(context, Icons.directions_run, l10n.cardioFinisher),
-            ],
-            const SizedBox(height: 24),
-            if (_isLastExercise)
-              FilledButton.tonalIcon(
-                onPressed: _hasAnyLoggedSet ? _finishWorkout : null,
-                icon: const Icon(Icons.flag),
-                label: Text(l10n.finishWorkout),
-              )
-            else
-              FilledButton.tonalIcon(
-                onPressed: _nextExercise,
-                icon: const Icon(Icons.arrow_forward),
-                label: Text(l10n.nextExercise),
-              ),
-            const SizedBox(height: 8),
-          ],
+                Text(
+                  '${equipmentLabel(l10n, exercise.equipment)} · '
+                  '${l10n.setsByReps(_planned.sets, _planned.repsMin, _planned.repsMax)} · '
+                  '${l10n.restInfo(_planned.restSeconds)}',
+                  style: textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    for (var i = 0; i < _planned.sets; i++)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: i < _currentSets.length
+                                ? colorScheme.primary
+                                : Colors.transparent,
+                            border: Border.all(
+                              color: i < _currentSets.length
+                                  ? colorScheme.primary
+                                  : colorScheme.outline,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Semantics(
+                      image: true,
+                      label: exercise.name,
+                      child: ExerciseFigure(
+                        key: ValueKey(_planned.exerciseId),
+                        illustration: illustrationFor(_planned.exerciseId),
+                        height: 150,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                _trainerCard(context, Icons.tips_and_updates, tip),
+                if (_planned.warmupSets > 0 && _currentSets.isEmpty) ...[
+                  const SizedBox(height: 8),
+                  _trainerCard(
+                    context,
+                    Icons.local_fire_department,
+                    l10n.warmupInfo(_planned.warmupSets),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                for (var i = 0; i < _currentSets.length; i++)
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      Icons.check_circle,
+                      color: colorScheme.primary,
+                    ),
+                    title: Text(l10n.setLabel(i + 1)),
+                    trailing: Text(
+                      l10n.setResult(
+                        formatKgIn(store.unit, _currentSets[i].weightKg),
+                        unit,
+                        _currentSets[i].reps,
+                      ),
+                      style: textTheme.titleLarge,
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                if (resting)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Text(
+                            l10n.restTitle.toUpperCase(),
+                            style: textTheme.labelSmall!.copyWith(
+                              letterSpacing: 2.5,
+                            ),
+                          ),
+                          Text(
+                            '$_restSecondsLeft',
+                            style: textTheme.displayLarge!.copyWith(
+                              color: colorScheme.primary,
+                              fontSize: 96,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          LinearProgressIndicator(
+                            value: (_restSecondsLeft / _planned.restSeconds)
+                                .clamp(0.0, 1.0),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(0, 40),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                ),
+                                onPressed: () => setState(() {
+                                  _restEndsAt = _restEndsAt?.add(
+                                    const Duration(seconds: 30),
+                                  );
+                                }),
+                                child: Text(l10n.addRestTime),
+                              ),
+                              const SizedBox(width: 12),
+                              TextButton(
+                                onPressed: () => setState(_stopRest),
+                                child: Text(l10n.skipRest),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else if (!allSetsDone)
+                  Form(
+                    key: _formKeys[_exerciseIndex],
+                    child: Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            IconButton.filledTonal(
+                              onPressed: () => _bumpWeight(-2.5),
+                              icon: const Icon(Icons.remove),
+                              padding: const EdgeInsets.all(14),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              flex: 3,
+                              child: TextFormField(
+                                controller: _weightController,
+                                textAlign: TextAlign.center,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                decoration: InputDecoration(
+                                  labelText: l10n.weightFieldLabel(unit),
+                                ),
+                                validator: (value) {
+                                  final weight = _parseNumber(value);
+                                  return weight == null || weight < 0
+                                      ? l10n.weightValidation(unit)
+                                      : null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            IconButton.filledTonal(
+                              onPressed: () => _bumpWeight(2.5),
+                              icon: const Icon(Icons.add),
+                              padding: const EdgeInsets.all(14),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                controller: _repsController,
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                  labelText: l10n.repsFieldLabel,
+                                ),
+                                validator: (value) {
+                                  final reps = _parseReps(value);
+                                  return reps == null || reps <= 0
+                                      ? l10n.repsValidation
+                                      : null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton.icon(
+                          onPressed: _logSet,
+                          icon: const Icon(Icons.check),
+                          label: Text(
+                            '${l10n.logSetButton} ${_currentSets.length + 1}/${_planned.sets}',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (showCardioFinisher) ...[
+                  const SizedBox(height: 8),
+                  _trainerCard(
+                    context,
+                    Icons.directions_run,
+                    l10n.cardioFinisher,
+                  ),
+                ],
+                const SizedBox(height: 24),
+                if (_isLastExercise)
+                  FilledButton.tonalIcon(
+                    onPressed: _hasAnyLoggedSet ? _finishWorkout : null,
+                    icon: const Icon(Icons.flag),
+                    label: Text(l10n.finishWorkout),
+                  )
+                else
+                  FilledButton.tonalIcon(
+                    onPressed: _nextExercise,
+                    icon: const Icon(Icons.arrow_forward),
+                    label: Text(l10n.nextExercise),
+                  ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
         ),
       ),
     );

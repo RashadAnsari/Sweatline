@@ -8,10 +8,23 @@
   "goalBuildMuscle": "Build muscle",
   "goalLoseWeight": "Lose weight",
   "goalGetFit": "Get fit",
+  "goalBuildMuscleDesc": "Heavier lifts, 6-12 reps, long rests",
+  "goalLoseWeightDesc": "Higher reps, short rests, cardio finishers",
+  "goalGetFitDesc": "Balanced strength and conditioning",
   "levelQuestion": "How experienced are you?",
   "levelBeginner": "Beginner",
   "levelIntermediate": "Intermediate",
   "levelAdvanced": "Advanced",
+  "levelBeginnerDesc": "New or returning after a break",
+  "levelIntermediateDesc": "6+ months of consistent training",
+  "levelAdvancedDesc": "Years of training, ready for volume",
+  "planPreview": "{days} days a week · about {minutes} min per session",
+  "@planPreview": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
   "daysQuestion": "How many days a week can you train?",
   "daysOption": "{count} days",
   "@daysOption": {
@@ -84,6 +97,13 @@
   "@workoutsThisWeek": {
     "placeholders": {
       "count": { "type": "int" }
+    }
+  },
+  "weeklyProgress": "{done} of {target} workouts this week",
+  "@weeklyProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "target": { "type": "int" }
     }
   },
   "lastWorkoutOn": "Last workout: {date}",
@@ -178,9 +198,27 @@
   "logSetButton": "Log set",
   "restTitle": "Rest",
   "skipRest": "Skip rest",
+  "addRestTime": "+30 s",
   "nextExercise": "Next exercise",
   "finishWorkout": "Finish workout",
   "workoutSavedMessage": "Workout saved. Good job!",
+  "workoutCompleteTitle": "Workout complete",
+  "statDuration": "Duration",
+  "statVolume": "Volume",
+  "statSetsLogged": "Sets",
+  "setsCount": "{count, plural, =1{1 set} other{{count} sets}}",
+  "@setsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "minutesValue": "{minutes} min",
+  "@minutesValue": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "doneButton": "Done",
   "exitWorkoutTitle": "Quit this workout?",
   "exitWorkoutBody": "The sets you logged in this session will be lost.",
   "keepGoing": "Keep going",

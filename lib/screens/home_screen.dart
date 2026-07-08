@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../exercise_library.dart';
+import '../exercise_poses.dart';
 import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
 import '../models.dart';
+import '../plan_generator.dart';
+import '../widgets/exercise_figure.dart';
+import '../widgets/page_body.dart';
 import 'exercise_detail_screen.dart';
 import 'library_tab.dart';
 import 'onboarding_screen.dart';
@@ -45,9 +49,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _tabIndex,
-        children: const [_TodayTab(), _PlanTab(), LibraryTab(), ProgressTab()],
+      body: PageBody(
+        child: IndexedStack(
+          index: _tabIndex,
+          children: const [
+            _TodayTab(),
+            _PlanTab(),
+            LibraryTab(),
+            ProgressTab(),
+          ],
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tabIndex,
@@ -75,16 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// Rough session length: warm-ups plus work sets with their rests.
-int estimatedMinutes(PlanDay day) {
-  var seconds = 0;
-  for (final planned in day.exercises) {
-    seconds += planned.warmupSets * 60;
-    seconds += planned.sets * (45 + planned.restSeconds);
-  }
-  return (seconds / 60).round();
-}
-
 class _TodayTab extends StatelessWidget {
   const _TodayTab();
 
@@ -96,10 +97,21 @@ class _TodayTab extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final day = store.todayPlanDay;
     final sessions = store.sessions;
+    final locale = Localizations.localeOf(context).toString();
+    final weeklyTarget = store.plan!.days.length;
+    // Capped at the target so overachieving weeks read "2 of 2", not "4 of 2".
+    final weeklyDone = store.sessionsThisWeek.clamp(0, weeklyTarget);
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        Text(
+          DateFormat.MMMMEEEEd(locale).format(DateTime.now()),
+          style: textTheme.bodyMedium!.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainer,
@@ -127,10 +139,44 @@ class _TodayTab extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 '${l10n.exerciseCount(day.exercises.length)} · '
-                '${l10n.estimatedMinutes(estimatedMinutes(day))}',
+                '${l10n.estimatedMinutes(estimatedSessionMinutes(day))}',
                 style: textTheme.bodyMedium,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  for (var i = 0; i < weeklyTarget; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: i < weeklyDone
+                              ? colorScheme.primary
+                              : Colors.transparent,
+                          border: Border.all(
+                            color: i < weeklyDone
+                                ? colorScheme.primary
+                                : colorScheme.outline,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      l10n.weeklyProgress(weeklyDone, weeklyTarget),
+                      style: textTheme.bodySmall!.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
               FilledButton.icon(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(
@@ -159,9 +205,7 @@ class _TodayTab extends StatelessWidget {
             sessions.isEmpty
                 ? l10n.noWorkoutsYet
                 : l10n.lastWorkoutOn(
-                    DateFormat.MMMEd(
-                      Localizations.localeOf(context).toString(),
-                    ).format(sessions.first.date),
+                    DateFormat.MMMEd(locale).format(sessions.first.date),
                   ),
           ),
         ),
@@ -181,6 +225,19 @@ class _PlannedExerciseTile extends StatelessWidget {
     final exercise = exerciseById(planned.exerciseId);
     return ListTile(
       contentPadding: EdgeInsets.zero,
+      leading: Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: ExerciseFigure(
+          illustration: illustrationFor(exercise.id),
+          height: 48,
+          animate: false,
+        ),
+      ),
       title: Text(exercise.name),
       subtitle: Text(
         '${l10n.setsByReps(planned.sets, planned.repsMin, planned.repsMax)} · '
@@ -239,6 +296,7 @@ class _PlanTab extends StatelessWidget {
       children: [
         Wrap(
           spacing: 8,
+          runSpacing: 8,
           children: [
             Chip(label: Text(goalLabel(l10n, plan.goal))),
             Chip(label: Text(levelLabel(l10n, plan.level))),
@@ -246,15 +304,37 @@ class _PlanTab extends StatelessWidget {
           ],
         ),
         for (final day in plan.days) ...[
-          const SizedBox(height: 20),
-          Text(
-            dayLabel(l10n, day.key),
-            style: textTheme.headlineSmall!.copyWith(
-              color: colorScheme.primary,
+          const SizedBox(height: 14),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          dayLabel(l10n, day.key),
+                          style: textTheme.headlineSmall!.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        l10n.estimatedMinutes(estimatedSessionMinutes(day)),
+                        style: textTheme.bodySmall!.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  for (final planned in day.exercises)
+                    _PlannedExerciseTile(planned: planned),
+                ],
+              ),
             ),
           ),
-          for (final planned in day.exercises)
-            _PlannedExerciseTile(planned: planned),
         ],
         const SizedBox(height: 20),
         OutlinedButton.icon(

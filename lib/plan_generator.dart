@@ -162,6 +162,16 @@ const Map<Level, int> _exercisesPerDay = {
 /// its rep range (double progression).
 const double progressionIncrementKg = 2.5;
 
+/// Rough session length: warm-ups plus work sets with their rests.
+int estimatedSessionMinutes(PlanDay day) {
+  var seconds = 0;
+  for (final planned in day.exercises) {
+    seconds += planned.warmupSets * 60;
+    seconds += planned.sets * (45 + planned.restSeconds);
+  }
+  return (seconds / 60).round();
+}
+
 Plan generatePlan({
   required Goal goal,
   required Level level,

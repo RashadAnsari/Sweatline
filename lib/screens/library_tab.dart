@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../exercise_library.dart';
+import '../exercise_poses.dart';
 import '../l10n/app_localizations.dart';
 import '../labels.dart';
+import '../widgets/exercise_figure.dart';
 import 'exercise_detail_screen.dart';
 
 /// Browsable exercise encyclopedia with search and muscle-group filters.
@@ -72,6 +74,21 @@ class _LibraryTabState extends State<LibraryTab> {
                   itemBuilder: (context, index) {
                     final exercise = results[index];
                     return ListTile(
+                      leading: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: ExerciseFigure(
+                          illustration: illustrationFor(exercise.id),
+                          height: 48,
+                          animate: false,
+                        ),
+                      ),
                       title: Text(exercise.name),
                       subtitle: Text(
                         '${equipmentLabel(l10n, exercise.equipment)} · '

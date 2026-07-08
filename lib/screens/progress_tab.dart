@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
 import 'exercise_detail_screen.dart';
+import 'workout_screen.dart';
 
 /// Progress overview: workout stats, per-exercise strength trend, and history.
 class ProgressTab extends StatelessWidget {
@@ -23,10 +24,27 @@ class ProgressTab extends StatelessWidget {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
-          child: Text(
-            l10n.noProgressYet,
-            style: textTheme.bodyLarge,
-            textAlign: TextAlign.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.trending_up, size: 56, color: colorScheme.outline),
+              const SizedBox(height: 16),
+              Text(
+                l10n.noProgressYet,
+                style: textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => WorkoutScreen(planDay: store.todayPlanDay),
+                  ),
+                ),
+                icon: const Icon(Icons.bolt),
+                label: Text(l10n.startWorkout),
+              ),
+            ],
           ),
         ),
       );
@@ -60,6 +78,8 @@ class ProgressTab extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        const _WeekDots(),
         const SizedBox(height: 24),
         Text(l10n.strengthProgressTitle, style: textTheme.titleLarge),
         for (final exerciseId in trainedExerciseIds)
@@ -74,6 +94,80 @@ class ProgressTab extends StatelessWidget {
             trailing: Text(l10n.exerciseCount(session.logs.length)),
           ),
       ],
+    );
+  }
+}
+
+/// Mon..Sun row showing which days had a workout this week.
+class _WeekDots extends StatelessWidget {
+  const _WeekDots();
+
+  @override
+  Widget build(BuildContext context) {
+    final store = StoreScope.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final locale = Localizations.localeOf(context).toString();
+    final now = DateTime.now();
+    final monday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            for (var i = 0; i < 7; i++)
+              Builder(
+                builder: (context) {
+                  final date = monday.add(Duration(days: i));
+                  final trained = store.sessions.any(
+                    (s) =>
+                        s.date.year == date.year &&
+                        s.date.month == date.month &&
+                        s.date.day == date.day,
+                  );
+                  final isToday = i == now.weekday - 1;
+                  return Column(
+                    children: [
+                      Text(
+                        DateFormat.E(locale).format(date).substring(0, 1),
+                        style: textTheme.labelSmall!.copyWith(
+                          color: isToday
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        width: 14,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: trained
+                              ? colorScheme.primary
+                              : Colors.transparent,
+                          border: Border.all(
+                            color: trained
+                                ? colorScheme.primary
+                                : isToday
+                                ? colorScheme.primary
+                                : colorScheme.outlineVariant,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

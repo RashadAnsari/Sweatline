@@ -17,7 +17,9 @@ backend, no data leaves the device.
   session, set logging, and a wall-clock rest timer with a haptic buzz.
   The screen stays awake, and an in-progress workout survives an app kill
   (auto-saved draft with resume).
-- **Exercise encyclopedia**: 57 exercises with equipment, muscle maps
+- **Exercise encyclopedia**: 57 exercises with equipment, animated
+  movement pictograms (a figure tweening between start and end position,
+  drawn in code from pose data in `lib/exercise_poses.dart`), muscle maps
   (front/back diagrams with primary and secondary muscles highlighted),
   step-by-step instructions, and trainer form cues.
 - **Progress tracking**: weekly and total stats, per-exercise strength
