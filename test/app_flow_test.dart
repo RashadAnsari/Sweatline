@@ -45,6 +45,11 @@ void main() {
     await tester.tap(find.text('Start workout'));
     await settleWorkout(tester);
 
+    // Dedicated warm-up step first.
+    expect(find.text('Warm-up'), findsWidgets);
+    await scrollAndTap(tester, find.text('Start lifting'));
+    await settleWorkout(tester);
+
     // First exercise, first-time trainer tip, log one set.
     expect(find.text('Exercise 1 of 4'), findsOneWidget);
     expect(
@@ -54,6 +59,15 @@ void main() {
     // The set-logging form sits below the fold; scroll it into build range.
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -500));
     await tester.pump();
+    // First attempt: reps prefilled with the bottom of the range (6 for the
+    // 6-8 main lift), weight left empty.
+    expect(
+      tester
+          .widget<TextFormField>(find.byType(TextFormField).last)
+          .controller!
+          .text,
+      '6',
+    );
     await tester.enterText(find.byType(TextFormField).first, '40');
     await tester.enterText(find.byType(TextFormField).last, '10');
     await scrollAndTap(tester, find.textContaining('Log set'));

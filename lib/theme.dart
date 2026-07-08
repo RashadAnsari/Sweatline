@@ -1,3 +1,8 @@
+// CupertinoPageTransitionsBuilder moved from the material to the cupertino
+// library in Flutter stable after 3.41; the explicit import keeps this file
+// compiling on both.
+// ignore: unnecessary_import
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 /// Sweatline visual identity: industrial gym utility.

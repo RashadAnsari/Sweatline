@@ -134,7 +134,11 @@
       "count": { "type": "int" }
     }
   },
-  "sessionWarmup": "Warm up first: 5-10 minutes of easy cardio and some dynamic stretching.",
+  "warmupTitle": "Warm-up",
+  "warmupCardio": "5-10 minutes of easy cardio to raise your heart rate: bike, rowing machine, or a brisk incline walk.",
+  "warmupDynamic": "Dynamic stretches for what you are about to train: leg swings, arm circles, light bodyweight reps.",
+  "warmupLifts": "Your first lift prescribes its own warm-up sets before the working weight.",
+  "startLifting": "Start lifting",
   "effortNote": "Work hard but not to failure: finish each set with 1-2 clean reps left in the tank.",
   "cardioFinisher": "Trainer's orders: finish with 15-20 minutes of moderate cardio to drive fat loss.",
   "newPlanButton": "New plan",
