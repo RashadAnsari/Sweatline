@@ -51,6 +51,9 @@ void main() {
       find.text('First time doing this. Start light and focus on clean form.'),
       findsOneWidget,
     );
+    // The set-logging form sits below the fold; scroll it into build range.
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -500));
+    await tester.pump();
     await tester.enterText(find.byType(TextFormField).first, '40');
     await tester.enterText(find.byType(TextFormField).last, '10');
     await scrollAndTap(tester, find.textContaining('Log set'));

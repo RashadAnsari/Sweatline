@@ -352,6 +352,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                     Icons.directions_run,
                     l10n.sessionWarmup,
                   ),
+                  const SizedBox(height: 8),
+                  _trainerCard(context, Icons.speed, l10n.effortNote),
                   const SizedBox(height: 12),
                 ],
                 Row(

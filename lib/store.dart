@@ -209,8 +209,8 @@ class AppStore extends ChangeNotifier {
     return null;
   }
 
-  /// Trainer suggestion: repeat last weight, or add
-  /// [progressionIncrementKg] once every set hit the top of the rep range.
+  /// Trainer suggestion: repeat last weight, or add the exercise's
+  /// progression increment once every set hit the top of the rep range.
   double? suggestedWeight(PlannedExercise planned) {
     final last = lastLogFor(planned.exerciseId);
     if (last == null) return null;
@@ -218,7 +218,7 @@ class AppStore extends ChangeNotifier {
         last.sets.length >= planned.sets &&
         last.sets.every((s) => s.reps >= planned.repsMax);
     return allSetsAtTop
-        ? last.bestWeight + progressionIncrementKg
+        ? last.bestWeight + incrementFor(planned.exerciseId)
         : last.bestWeight;
   }
 

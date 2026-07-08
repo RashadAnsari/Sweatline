@@ -8,6 +8,7 @@ on:
 
 jobs:
   quality:
+    name: Quality
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

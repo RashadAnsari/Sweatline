@@ -5,21 +5,32 @@ import 'models.dart';
 /// into a weekly plan the way a coach would program it:
 ///
 /// - Proven splits per frequency: full body (2), push/pull/legs (3),
-///   upper/lower (4), PPL + upper/lower (5), PPL twice (6).
+///   upper/lower (4), PPL + upper + a second leg day (5), PPL twice (6).
 /// - Compound lifts first while you are fresh; isolation and core last.
 /// - The first heavy compound of the day gets 2 warm-up sets, other
 ///   compounds get 1, isolation gets none.
 /// - Rep ranges and rest periods depend on the goal and on whether the
 ///   exercise is a compound (heavier, longer rest) or isolation (lighter,
-///   shorter rest).
+///   shorter rest). Meta-analyses favor longer rests on compounds; short
+///   rests are fine on single-joint work.
+/// - Fat-loss plans keep loads moderately heavy (8-15 reps) to preserve
+///   muscle in a deficit; the deficit itself comes from diet plus the
+///   prescribed cardio finisher, not from turning lifting into cardio.
+/// - Deadlifts are capped at 3 working sets when programmed as the main
+///   lift; heavy pulls tax recovery more than anything else in the gym.
 /// - Volume scales with experience: 4 exercises per day for beginners,
 ///   6 for intermediates, 7 for advanced lifters.
+/// - Double progression: lower-body barbell/machine compounds jump 5 kg
+///   once every set hits the top of the rep range, everything else 2.5 kg.
 
 const Map<int, List<String>> _splits = {
   2: ['fullBodyA', 'fullBodyB'],
   3: ['push', 'pull', 'legs'],
   4: ['upperA', 'lowerA', 'upperB', 'lowerB'],
-  5: ['push', 'pull', 'legs', 'upperA', 'lowerA'],
+  // Leg day B instead of lowerA: lowerA would nearly duplicate the PPL leg
+  // day (same squat/RDL/leg press block) and stack a third heavy hinge on
+  // the week.
+  5: ['push', 'pull', 'legs', 'upperA', 'legsB'],
   6: ['push', 'pull', 'legs', 'pushB', 'pullB', 'legsB'],
 };
 
@@ -53,12 +64,14 @@ const Map<String, List<String>> _dayExercises = {
     'tricepPushdown',
     'overheadTricepExtension',
   ],
+  // Face pull comes fourth so even the beginner version trains the rear
+  // delts and rotator cuff, not just three rows in a row.
   'pull': [
     'deadlift',
     'latPulldown',
     'barbellRow',
-    'seatedRow',
     'facePull',
+    'seatedRow',
     'barbellCurl',
     'hammerCurl',
   ],
@@ -146,11 +159,18 @@ class _Rx {
 }
 
 /// Per goal: [main lift, other compounds, isolation].
+///
+/// Fat-loss keeps loads moderately heavy: muscle is preserved in a deficit
+/// by maintaining intensity, not by chasing 20-rep burnout sets.
 const Map<Goal, List<_Rx>> _prescriptions = {
   Goal.buildMuscle: [_Rx(4, 6, 8, 180), _Rx(3, 8, 10, 120), _Rx(3, 10, 15, 90)],
-  Goal.loseWeight: [_Rx(3, 10, 12, 90), _Rx(3, 12, 15, 75), _Rx(3, 15, 20, 60)],
+  Goal.loseWeight: [_Rx(3, 8, 10, 120), _Rx(3, 10, 12, 90), _Rx(3, 12, 15, 60)],
   Goal.getFit: [_Rx(3, 8, 10, 120), _Rx(3, 10, 12, 90), _Rx(3, 12, 15, 60)],
 };
+
+/// Deadlift as the day's main lift: fewer sets, slightly lower reps.
+/// 4x6-8 heavy pulls every week is a recovery bill nobody can pay.
+const _deadliftMainRx = _Rx(3, 5, 8, 180);
 
 const Map<Level, int> _exercisesPerDay = {
   Level.beginner: 4,
@@ -161,6 +181,21 @@ const Map<Level, int> _exercisesPerDay = {
 /// Weight increment suggested once every set of an exercise hits the top of
 /// its rep range (double progression).
 const double progressionIncrementKg = 2.5;
+
+/// Lower-body barbell/machine compounds handle bigger jumps; 2.5 kg on a
+/// leg press is stalling on purpose.
+const Set<String> _bigIncrementExercises = {
+  'squat',
+  'frontSquat',
+  'legPress',
+  'hackSquat',
+  'deadlift',
+  'romanianDeadlift',
+  'hipThrust',
+};
+
+double incrementFor(String exerciseId) =>
+    _bigIncrementExercises.contains(exerciseId) ? 5.0 : progressionIncrementKg;
 
 /// Rough session length: warm-ups plus work sets with their rests.
 int estimatedSessionMinutes(PlanDay day) {
@@ -222,7 +257,7 @@ PlannedExercise _plan(String id, List<_Rx> prescriptions, int compoundIndex) {
   final _Rx rx;
   final int warmups;
   if (compoundIndex == 0) {
-    rx = prescriptions[0];
+    rx = id == 'deadlift' ? _deadliftMainRx : prescriptions[0];
     warmups = 2;
   } else if (compoundIndex > 0) {
     rx = prescriptions[1];

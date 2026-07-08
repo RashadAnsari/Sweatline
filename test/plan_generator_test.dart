@@ -89,14 +89,62 @@ void main() {
   });
 
   test('goal shifts rep ranges and rest periods', () {
+    // Fat loss keeps loads moderately heavy to preserve muscle in a
+    // deficit; only build-muscle goes heavier still on the main lift.
     final loseWeight = generatePlan(
       goal: Goal.loseWeight,
       level: Level.beginner,
       daysPerWeek: 3,
     ).days.first.exercises.first;
-    expect(loseWeight.repsMin, 10);
-    expect(loseWeight.repsMax, 12);
-    expect(loseWeight.restSeconds, 90);
+    expect(loseWeight.repsMin, 8);
+    expect(loseWeight.repsMax, 10);
+    expect(loseWeight.restSeconds, 120);
+  });
+
+  test('deadlift as main lift is capped at 3 sets of 5-8', () {
+    final pull = generatePlan(
+      goal: Goal.buildMuscle,
+      level: Level.intermediate,
+      daysPerWeek: 3,
+    ).days[1];
+    final deadlift = pull.exercises.first;
+    expect(deadlift.exerciseId, 'deadlift');
+    expect(deadlift.sets, 3);
+    expect(deadlift.repsMin, 5);
+    expect(deadlift.repsMax, 8);
+    expect(deadlift.warmupSets, 2);
+  });
+
+  test('beginner pull day includes rear-delt work', () {
+    final pull = generatePlan(
+      goal: Goal.getFit,
+      level: Level.beginner,
+      daysPerWeek: 3,
+    ).days[1];
+    expect(pull.exercises.map((e) => e.exerciseId), contains('facePull'));
+  });
+
+  test('5-day split has two distinct leg days, no duplicate day content', () {
+    final plan = generatePlan(
+      goal: Goal.buildMuscle,
+      level: Level.intermediate,
+      daysPerWeek: 5,
+    );
+    expect(plan.days.map((d) => d.key), containsAll(['legs', 'legsB']));
+    final legs = plan.days.firstWhere((d) => d.key == 'legs');
+    final legsB = plan.days.firstWhere((d) => d.key == 'legsB');
+    expect(
+      legs.exercises.first.exerciseId,
+      isNot(legsB.exercises.first.exerciseId),
+    );
+  });
+
+  test('lower-body compounds progress in bigger jumps', () {
+    expect(incrementFor('squat'), 5.0);
+    expect(incrementFor('deadlift'), 5.0);
+    expect(incrementFor('legPress'), 5.0);
+    expect(incrementFor('benchPress'), progressionIncrementKg);
+    expect(incrementFor('bicepCurl'), progressionIncrementKg);
   });
 
   test('every planned exercise exists in the library and none is cardio', () {
