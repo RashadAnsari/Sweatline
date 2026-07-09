@@ -138,11 +138,13 @@ void main() {
         daysPerWeek: 3,
       ),
     );
-    // Simulate an app kill after one bench set was logged.
+    // Simulate an app kill while on the third exercise, having logged one
+    // bench set on the first exercise earlier.
     await store.saveDraft(
       WorkoutDraft(
         dayKey: 'push',
         startedAt: DateTime.now(),
+        exerciseIndex: 2,
         sets: const {
           'benchPress': [SetLog(weightKg: 40, reps: 8)],
         },
@@ -152,13 +154,21 @@ void main() {
     await tester.pumpWidget(SweatlineApp(store: store));
     await tester.pumpAndSettle();
 
+    // The Today tab opens straight on the in-progress workout with a Resume
+    // button, skipping the warm-up page on resume.
     expect(find.text('Resume workout'), findsOneWidget);
     await tester.tap(find.text('Resume workout'));
     await settleWorkout(tester);
 
-    // Back on bench press with the logged set restored.
+    // Resumes at the exact saved exercise, not exercise 1.
+    expect(find.text('Exercise 3 of 4'), findsOneWidget);
+
+    // Stepping back to exercise 1 shows the previously logged set.
+    await scrollAndTap(tester, find.text('Previous'));
+    await settleWorkout(tester);
+    await scrollAndTap(tester, find.text('Previous'));
+    await settleWorkout(tester);
     expect(find.text('Exercise 1 of 4'), findsOneWidget);
-    expect(find.text('Set 1'), findsOneWidget);
     expect(find.text('40 kg x 8'), findsOneWidget);
   });
 }

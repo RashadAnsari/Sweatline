@@ -142,6 +142,24 @@ void main() {
     expect(AppStore(prefs).draft, isNull);
   });
 
+  test('workout draft round-trips the resume position', () async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final store = AppStore(prefs);
+    await store.saveDraft(
+      WorkoutDraft(
+        dayKey: 'legs',
+        startedAt: DateTime(2026, 7, 9, 18),
+        exerciseIndex: 3,
+        sets: const {
+          'squat': [SetLog(weightKg: 80, reps: 6)],
+        },
+      ),
+    );
+
+    expect(AppStore(prefs).draft!.exerciseIndex, 3);
+  });
+
   test('settings persist across store instances', () async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();

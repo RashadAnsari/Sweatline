@@ -34,7 +34,8 @@ class WorkoutScreen extends StatefulWidget {
   State<WorkoutScreen> createState() => _WorkoutScreenState();
 }
 
-class _WorkoutScreenState extends State<WorkoutScreen> {
+class _WorkoutScreenState extends State<WorkoutScreen>
+    with WidgetsBindingObserver {
   late final List<List<SetLog>> _loggedSets = List.generate(
     widget.planDay.exercises.length,
     (_) => [],
@@ -72,7 +73,18 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _setWakelock(true);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // The OS may kill a backgrounded app without further callbacks, so flush
+    // the draft the moment we lose foreground.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _saveDraft();
+    }
   }
 
   @override
@@ -87,6 +99,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _restTicker?.cancel();
     _weightController.dispose();
     _repsController.dispose();
@@ -109,22 +122,32 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       final saved = draft.sets[widget.planDay.exercises[i].exerciseId];
       if (saved != null) _loggedSets[i] = List.of(saved);
     }
-    // Resume at the first exercise that still has sets to do.
-    var resumeIndex = widget.planDay.exercises.length - 1;
-    for (var i = 0; i < widget.planDay.exercises.length; i++) {
-      if (_loggedSets[i].length < widget.planDay.exercises[i].sets) {
-        resumeIndex = i;
-        break;
+    // Prefer the exact saved position; older drafts lack it, so fall back to
+    // the first exercise that still has sets to do.
+    final lastExercise = widget.planDay.exercises.length - 1;
+    if (draft.exerciseIndex != null) {
+      _exerciseIndex = draft.exerciseIndex!.clamp(0, lastExercise);
+    } else {
+      _exerciseIndex = lastExercise;
+      for (var i = 0; i < widget.planDay.exercises.length; i++) {
+        if (_loggedSets[i].length < widget.planDay.exercises[i].sets) {
+          _exerciseIndex = i;
+          break;
+        }
       }
     }
-    _exerciseIndex = resumeIndex;
   }
 
+  /// Persists the in-progress workout. Only once lifting has begun
+  /// (`_exerciseIndex >= 0`): a draft always means "resume me", so a session
+  /// abandoned on the warm-up page never becomes a phantom resume prompt.
   Future<void> _saveDraft() {
+    if (_exerciseIndex < 0) return Future.value();
     return StoreScope.of(context).saveDraft(
       WorkoutDraft(
         dayKey: widget.planDay.key,
         startedAt: _startedAt,
+        exerciseIndex: _exerciseIndex,
         sets: {
           for (var i = 0; i < _loggedSets.length; i++)
             if (_loggedSets[i].isNotEmpty)
@@ -228,6 +251,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       _repsController.clear();
       _prefillInputs();
     });
+    _saveDraft();
   }
 
   Future<void> _finishWorkout() async {
@@ -359,6 +383,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               _exerciseIndex = 0;
               _prefillInputs();
             });
+            _saveDraft();
           },
           icon: const Icon(Icons.bolt),
           label: Text(l10n.startLifting),

@@ -168,13 +168,14 @@ class ExerciseLog {
   );
 }
 
-/// In-progress workout, auto-saved after every set so a phone call or an
-/// app kill mid-session never loses logged work.
+/// In-progress workout, auto-saved continuously so closing or killing the
+/// app mid-session resumes exactly where the lifter left off.
 class WorkoutDraft {
   const WorkoutDraft({
     required this.dayKey,
     required this.startedAt,
     required this.sets,
+    this.exerciseIndex,
   });
 
   final String dayKey;
@@ -183,9 +184,15 @@ class WorkoutDraft {
   /// Logged sets per exercise id.
   final Map<String, List<SetLog>> sets;
 
+  /// The exercise the lifter was on when last saved. Null in drafts from
+  /// before this field existed; the workout screen then infers the position
+  /// from which sets are still incomplete.
+  final int? exerciseIndex;
+
   Map<String, dynamic> toJson() => {
     'dayKey': dayKey,
     'startedAt': startedAt.toIso8601String(),
+    'exerciseIndex': exerciseIndex,
     'sets': sets.map(
       (id, logs) => MapEntry(id, logs.map((s) => s.toJson()).toList()),
     ),
@@ -194,6 +201,7 @@ class WorkoutDraft {
   factory WorkoutDraft.fromJson(Map<String, dynamic> json) => WorkoutDraft(
     dayKey: json['dayKey'] as String,
     startedAt: DateTime.parse(json['startedAt'] as String),
+    exerciseIndex: json['exerciseIndex'] as int?,
     sets: (json['sets'] as Map<String, dynamic>).map(
       (id, logs) => MapEntry(
         id,

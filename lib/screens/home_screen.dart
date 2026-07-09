@@ -96,6 +96,27 @@ class _TodayTab extends StatefulWidget {
 class _TodayTabState extends State<_TodayTab> {
   /// Offset from today's plan day; browsing wraps around the split.
   int _dayOffset = 0;
+  bool _startedOnDraft = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // On launch, open on the in-progress workout's day so its Resume button
+    // is the first thing shown.
+    if (_startedOnDraft) return;
+    _startedOnDraft = true;
+    final store = StoreScope.of(context);
+    final draft = store.draft;
+    if (draft == null) return;
+    final plan = store.plan!;
+    final draftIndex = plan.days.indexWhere((d) => d.key == draft.dayKey);
+    final todayIndex = plan.days.indexWhere(
+      (d) => d.key == store.todayPlanDay.key,
+    );
+    if (draftIndex >= 0 && todayIndex >= 0) {
+      _dayOffset = draftIndex - todayIndex;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
