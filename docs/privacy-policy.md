@@ -1,4 +1,4 @@
-# Privacy Policy for Sweatline
+# Privacy Policy
 
 Last updated: 9 July 2026
 
@@ -58,7 +58,3 @@ else.
 
 If this policy changes, the updated version will be published at this address
 and the "Last updated" date above will change.
-
-## Contact
-
-Questions about this policy: rashad.ansari1996@gmail.com
