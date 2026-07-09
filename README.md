@@ -5,6 +5,39 @@ weekly gym plan the way a coach would, guides you through every session, and
 tracks your strength progress. Everything runs offline; no account, no
 backend, no data leaves the device.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td><img src="docs/today-workout.png" alt="Today workout screen" width="180"></td>
+    <td><img src="docs/plan-overview.png" alt="Plan overview screen" width="180"></td>
+    <td><img src="docs/exercise-library.png" alt="Exercise library screen" width="180"></td>
+    <td><img src="docs/progress-dashboard.png" alt="Progress dashboard screen" width="180"></td>
+    <td><img src="docs/exercise-detail-overview.png" alt="Exercise detail overview screen" width="180"></td>
+  </tr>
+  <tr>
+    <td align="center">Today</td>
+    <td align="center">Plan</td>
+    <td align="center">Library</td>
+    <td align="center">Progress</td>
+    <td align="center">Exercise detail</td>
+  </tr>
+  <tr>
+    <td><img src="docs/exercise-detail-instructions.png" alt="Exercise instructions screen" width="180"></td>
+    <td><img src="docs/workout-warmup.png" alt="Workout warmup screen" width="180"></td>
+    <td><img src="docs/workout-set-logging.png" alt="Workout set logging screen" width="180"></td>
+    <td><img src="docs/workout-rest-timer.png" alt="Workout rest timer screen" width="180"></td>
+    <td><img src="docs/workout-summary.png" alt="Workout summary screen" width="180"></td>
+  </tr>
+  <tr>
+    <td align="center">Instructions</td>
+    <td align="center">Warmup</td>
+    <td align="center">Set logging</td>
+    <td align="center">Rest timer</td>
+    <td align="center">Summary</td>
+  </tr>
+</table>
+
 ## Features
 
 - **Built-in trainer**: a three-question quiz (goal, experience, frequency)
