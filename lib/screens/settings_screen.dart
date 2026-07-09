@@ -125,6 +125,8 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(l10n.privacyNote, style: textTheme.bodyMedium),
+            const SizedBox(height: 4),
+            Text(l10n.healthDisclaimer, style: textTheme.bodyMedium),
           ],
         ),
       ),

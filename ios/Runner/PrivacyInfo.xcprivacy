@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<!-- Sweatline runs fully offline. It collects nothing, tracks nobody,
+		     and calls no required-reason APIs from its own code. The bundled
+		     plugins (sqflite_darwin, package_info_plus, wakelock_plus) ship
+		     their own privacy manifests, which Xcode merges into the report. -->
+		<key>NSPrivacyTracking</key>
+		<false/>
+		<key>NSPrivacyTrackingDomains</key>
+		<array/>
+		<key>NSPrivacyCollectedDataTypes</key>
+		<array/>
+		<key>NSPrivacyAccessedAPITypes</key>
+		<array/>
+	</dict>
+</plist>

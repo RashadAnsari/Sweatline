@@ -40,6 +40,11 @@ flutter test --exclude-tags golden
 
 ## Releases
 
-- Bump `version:` in pubspec.yaml.
+- Bump `version:` in pubspec.yaml. The build number after `+` must increase on
+  every upload to either store.
 - App icon: `flutter test --update-goldens --tags golden
   test/tools/app_icon_test.dart` then `dart run flutter_launcher_icons`.
+- The release build must stay network-free. `INTERNET` is declared only in
+  the debug manifest, and both stores have been told the app collects no
+  data. Adding a networking dependency invalidates that and forces an update
+  to `docs/privacy-policy.md` and the Data Safety answers.
