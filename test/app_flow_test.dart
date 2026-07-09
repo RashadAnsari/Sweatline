@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweatline/main.dart';
 import 'package:sweatline/models.dart';
 import 'package:sweatline/plan_generator.dart';
-import 'package:sweatline/store.dart';
+
+import 'test_database.dart';
 
 /// The workout screen has an endlessly repeating pictogram animation, so
 /// pumpAndSettle would never settle while it is visible; this pumps just
@@ -28,9 +28,10 @@ Future<void> scrollAndTap(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
+  setUpAll(initTestDatabase);
+
   testWidgets('onboarding to finished workout to progress', (tester) async {
-    SharedPreferences.setMockInitialValues({});
-    final store = AppStore(await SharedPreferences.getInstance());
+    final store = await openTestStore();
     await tester.pumpWidget(SweatlineApp(store: store));
     await tester.pumpAndSettle();
 
@@ -129,8 +130,7 @@ void main() {
 
   testWidgets('an interrupted workout is offered for resume and restores '
       'logged sets', (tester) async {
-    SharedPreferences.setMockInitialValues({});
-    final store = AppStore(await SharedPreferences.getInstance());
+    final store = await openTestStore();
     await store.setPlan(
       generatePlan(
         goal: Goal.buildMuscle,

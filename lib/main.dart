@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'database.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -25,8 +25,9 @@ Future<void> main() async {
   };
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  final prefs = await SharedPreferences.getInstance();
-  runApp(SweatlineApp(store: AppStore(prefs)));
+  final db = await AppDatabase.open();
+  final store = await AppStore.open(db);
+  runApp(SweatlineApp(store: store));
 }
 
 /// Exposes the [AppStore] to the widget tree and rebuilds dependents on change.

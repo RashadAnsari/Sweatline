@@ -1,41 +1,91 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'database.dart';
 import 'models.dart';
 import 'plan_generator.dart';
 
-/// App state with local JSON persistence via SharedPreferences.
+/// App state backed by SQLite ([AppDatabase]).
 ///
-/// Robustness rules:
-/// - Every stored blob is decoded defensively. A corrupt value is
-///   quarantined under `corrupt.<key>.<timestamp>` instead of crashing the
-///   app; the user loses that blob, never the whole app.
-/// - `schemaVersion` is written on every load so future format changes can
-///   migrate old data explicitly.
+/// The public API is synchronous: everything is loaded into memory once at
+/// [open], and reads (used inside widget builds) serve from that cache.
+/// Writes update the cache and persist incrementally to the database, so
+/// logging a workout inserts a few rows instead of rewriting all history.
+///
+/// Meta values (plan, draft) are decoded defensively: a corrupt value is
+/// dropped and logged instead of crashing the app.
 class AppStore extends ChangeNotifier {
-  AppStore(this._prefs) {
-    _load();
-  }
+  AppStore._(
+    this._db, {
+    required Plan? plan,
+    required List<WorkoutSession> sessions,
+    required WorkoutDraft? draft,
+    required WeightUnit unit,
+    required ThemeMode themeMode,
+  }) : _plan = plan,
+       _sessions = sessions,
+       _draft = draft,
+       _unit = unit,
+       _themeMode = themeMode;
 
   static const _planKey = 'plan';
-  static const _sessionsKey = 'sessions';
   static const _draftKey = 'draft';
   static const _unitKey = 'unit';
   static const _themeModeKey = 'themeMode';
-  static const _schemaVersionKey = 'schemaVersion';
 
-  /// Bump when the persisted format changes; add a migration in [_load].
-  static const schemaVersion = 2;
-
-  final SharedPreferences _prefs;
+  final AppDatabase _db;
 
   Plan? _plan;
-  List<WorkoutSession> _sessions = [];
+  List<WorkoutSession> _sessions;
   WorkoutDraft? _draft;
-  WeightUnit _unit = WeightUnit.kg;
-  ThemeMode _themeMode = ThemeMode.system;
+  WeightUnit _unit;
+  ThemeMode _themeMode;
+
+  /// Opens the store, loading everything from [db] into memory.
+  static Future<AppStore> open(AppDatabase db) async {
+    final plan = await _guarded(db, _planKey, (raw) {
+      return Plan.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    });
+    final draft = await _guarded(db, _draftKey, (raw) {
+      return WorkoutDraft.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    });
+    final unit = _enumMeta(await db.getMeta(_unitKey), WeightUnit.values);
+    final themeMode = _enumMeta(
+      await db.getMeta(_themeModeKey),
+      ThemeMode.values,
+    );
+
+    return AppStore._(
+      db,
+      plan: plan,
+      sessions: await db.loadSessions(),
+      draft: draft,
+      unit: unit ?? WeightUnit.kg,
+      themeMode: themeMode ?? ThemeMode.system,
+    );
+  }
+
+  /// Decodes a meta value; on failure drops the bad row and returns null so
+  /// the rest of the app keeps working.
+  static Future<T?> _guarded<T>(
+    AppDatabase db,
+    String key,
+    T Function(String raw) decode,
+  ) async {
+    final raw = await db.getMeta(key);
+    if (raw == null) return null;
+    try {
+      return decode(raw);
+    } catch (error) {
+      debugPrint('Sweatline: corrupt "$key" dropped: $error');
+      await db.deleteMeta(key);
+      return null;
+    }
+  }
+
+  static T? _enumMeta<T extends Enum>(String? raw, List<T> values) =>
+      raw == null ? null : values.asNameMap()[raw];
 
   Plan? get plan => _plan;
 
@@ -48,104 +98,45 @@ class AppStore extends ChangeNotifier {
 
   bool get hasPlan => _plan != null;
 
-  void _load() {
-    // Schema v1 lacked warmupSets on planned exercises; fromJson defaults
-    // cover it, so no data rewrite is needed yet.
-    _prefs.setInt(_schemaVersionKey, schemaVersion);
-
-    _plan = _guarded(_planKey, () {
-      final raw = _prefs.getString(_planKey);
-      if (raw == null) return null;
-      return Plan.fromJson(jsonDecode(raw) as Map<String, dynamic>);
-    });
-    _sessions =
-        _guarded(_sessionsKey, () {
-          final raw = _prefs.getString(_sessionsKey);
-          if (raw == null) return null;
-          return (jsonDecode(raw) as List)
-              .map((s) => WorkoutSession.fromJson(s as Map<String, dynamic>))
-              .toList();
-        }) ??
-        [];
-    _draft = _guarded(_draftKey, () {
-      final raw = _prefs.getString(_draftKey);
-      if (raw == null) return null;
-      return WorkoutDraft.fromJson(jsonDecode(raw) as Map<String, dynamic>);
-    });
-    _unit = _enumPref(_unitKey, WeightUnit.values) ?? WeightUnit.kg;
-    _themeMode = _enumPref(_themeModeKey, ThemeMode.values) ?? ThemeMode.system;
-  }
-
-  /// Decodes one stored blob; on failure quarantines the raw value and
-  /// returns null so the rest of the app keeps working.
-  T? _guarded<T>(String key, T? Function() decode) {
-    try {
-      return decode();
-    } catch (error) {
-      debugPrint('Sweatline: corrupt "$key" quarantined: $error');
-      final raw = _prefs.getString(key);
-      if (raw != null) {
-        _prefs.setString(
-          'corrupt.$key.${DateTime.now().millisecondsSinceEpoch}',
-          raw,
-        );
-      }
-      _prefs.remove(key);
-      return null;
-    }
-  }
-
-  T? _enumPref<T extends Enum>(String key, List<T> values) {
-    final raw = _prefs.getString(key);
-    if (raw == null) return null;
-    return values.asNameMap()[raw];
-  }
-
   Future<void> setPlan(Plan plan) async {
     _plan = plan;
-    await _prefs.setString(_planKey, jsonEncode(plan.toJson()));
+    await _db.setMeta(_planKey, jsonEncode(plan.toJson()));
     notifyListeners();
   }
 
   Future<void> addSession(WorkoutSession session) async {
     _sessions.insert(0, session);
-    await _persistSessions();
+    await _db.insertSession(session);
     notifyListeners();
   }
 
-  Future<void> _persistSessions() => _prefs.setString(
-    _sessionsKey,
-    jsonEncode(_sessions.map((s) => s.toJson()).toList()),
-  );
-
   Future<void> saveDraft(WorkoutDraft draft) async {
     _draft = draft;
-    await _prefs.setString(_draftKey, jsonEncode(draft.toJson()));
+    await _db.setMeta(_draftKey, jsonEncode(draft.toJson()));
     notifyListeners();
   }
 
   Future<void> clearDraft() async {
     _draft = null;
-    await _prefs.remove(_draftKey);
+    await _db.deleteMeta(_draftKey);
     notifyListeners();
   }
 
   Future<void> setUnit(WeightUnit unit) async {
     _unit = unit;
-    await _prefs.setString(_unitKey, unit.name);
+    await _db.setMeta(_unitKey, unit.name);
     notifyListeners();
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
-    await _prefs.setString(_themeModeKey, mode.name);
+    await _db.setMeta(_themeModeKey, mode.name);
     notifyListeners();
   }
 
   /// Full backup as a JSON string (plan, history, preferences).
   String exportData() => jsonEncode({
     'app': 'sweatline',
-    'schemaVersion': schemaVersion,
     'plan': _plan?.toJson(),
     'sessions': _sessions.map((s) => s.toJson()).toList(),
     'unit': _unit.name,
@@ -180,12 +171,12 @@ class AppStore extends ChangeNotifier {
     _sessions = sessions;
     _unit = unit;
     if (plan == null) {
-      await _prefs.remove(_planKey);
+      await _db.deleteMeta(_planKey);
     } else {
-      await _prefs.setString(_planKey, jsonEncode(plan.toJson()));
+      await _db.setMeta(_planKey, jsonEncode(plan.toJson()));
     }
-    await _persistSessions();
-    await _prefs.setString(_unitKey, unit.name);
+    await _db.replaceAllSessions(sessions);
+    await _db.setMeta(_unitKey, unit.name);
     await clearDraft();
   }
 

@@ -55,16 +55,22 @@ dart run flutter_launcher_icons
 
 ## Architecture
 
-Single local store (`lib/store.dart`, `ChangeNotifier` over
-SharedPreferences JSON) exposed through an `InheritedNotifier`. Domain
-models in `lib/models.dart` serialize to JSON with stable string keys; all
-user-facing strings go through `flutter gen-l10n` (`lib/l10n/app_en.arb`).
-The exercise library and plan templates are code-defined seed data in
-`lib/exercise_library.dart` and `lib/plan_generator.dart`.
+Single local store (`lib/store.dart`, a `ChangeNotifier` over SQLite via
+`lib/database.dart`) exposed through an `InheritedNotifier`. Workout history
+is normalized across `sessions` / `exercise_logs` / `set_logs` tables, so
+logging a workout is a few row inserts rather than a rewrite of the whole
+history; plan, in-progress draft, and settings live as rows in a small
+`meta` key-value table. Domain models in `lib/models.dart` serialize to JSON
+with stable string keys; all user-facing strings go through
+`flutter gen-l10n` (`lib/l10n/app_en.arb`). The exercise library and plan
+templates are code-defined seed data in `lib/exercise_library.dart` and
+`lib/plan_generator.dart`.
 
-Persistence is versioned (`schemaVersion`) and defensive: corrupt blobs are
-quarantined, never crash the app. Weights are stored in kilograms and
-converted at the display boundary.
+The store keeps a synchronous public API by loading everything into memory
+once at `AppStore.open` and writing incrementally. The schema version is
+SQLite's `PRAGMA user_version`. Corrupt meta values are dropped, never crash
+the app. Weights are stored in kilograms and converted at the display
+boundary.
 
 ## Privacy
 

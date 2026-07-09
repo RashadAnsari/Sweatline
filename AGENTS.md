@@ -17,9 +17,12 @@ architecture overview.
 - **Weights are stored in kilograms**, always. Convert to the user's
   display unit only at the UI boundary via `kgToUnit` / `unitToKg` in
   `lib/labels.dart`.
-- **Persistence changes need care**: bump `AppStore.schemaVersion` and add
-  a migration in `AppStore._load` when the stored format changes. New
-  JSON fields must have `fromJson` defaults so old data still loads.
+- **Persistence is SQLite** (`lib/database.dart`, `AppDatabase`). Session
+  history is normalized across the `sessions` / `exercise_logs` / `set_logs`
+  tables; plan, draft, and settings are rows in the `meta` key-value table.
+  When the schema changes, bump the version in `AppDatabase` and add an
+  `onUpgrade` branch. `AppStore` loads everything into an in-memory cache at
+  `open` and writes incrementally, keeping its reads synchronous for the UI.
 - **Theme discipline**: colors come from the `ColorScheme` in
   `lib/theme.dart` (volt/charcoal identity, Bebas Neue display font).
   Never hardcode colors in widgets.

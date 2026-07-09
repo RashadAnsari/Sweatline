@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweatline/models.dart';
 import 'package:sweatline/plan_generator.dart';
 import 'package:sweatline/store.dart';
 
-Future<AppStore> makeStore() async {
-  SharedPreferences.setMockInitialValues({});
-  return AppStore(await SharedPreferences.getInstance());
-}
+import 'test_database.dart';
 
 WorkoutSession sessionFor(String dayKey, List<SetLog> benchSets) =>
     WorkoutSession(
@@ -18,12 +14,11 @@ WorkoutSession sessionFor(String dayKey, List<SetLog> benchSets) =>
     );
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(initTestDatabase);
 
   test('plan and sessions persist across store instances', () async {
-    SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
-    final store = AppStore(prefs);
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
     await store.setPlan(
       generatePlan(
         goal: Goal.buildMuscle,
@@ -35,14 +30,15 @@ void main() {
       sessionFor('push', const [SetLog(weightKg: 40, reps: 10)]),
     );
 
-    final reloaded = AppStore(prefs);
+    final reloaded = await AppStore.open(db);
     expect(reloaded.hasPlan, isTrue);
     expect(reloaded.sessions.length, 1);
     expect(reloaded.sessions.first.dayKey, 'push');
+    expect(reloaded.sessions.first.logs.single.sets.single.weightKg, 40);
   });
 
   test('todayPlanDay cycles through the split', () async {
-    final store = await makeStore();
+    final store = await openTestStore();
     await store.setPlan(
       generatePlan(
         goal: Goal.buildMuscle,
@@ -58,122 +54,90 @@ void main() {
     expect(store.todayPlanDay.key, 'push');
   });
 
-  test(
-    'suggestedWeight repeats last weight until all sets hit top reps',
-    () async {
-      final store = await makeStore();
-      await store.setPlan(
-        generatePlan(
-          goal: Goal.buildMuscle,
-          level: Level.beginner,
-          daysPerWeek: 3,
-        ),
-      );
-      final planned = store.plan!.days.first.exercises.firstWhere(
-        (e) => e.exerciseId == 'benchPress',
-      );
+  test('suggestedWeight repeats last weight until all sets hit top reps', () async {
+    final store = await openTestStore();
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.buildMuscle,
+        level: Level.beginner,
+        daysPerWeek: 3,
+      ),
+    );
+    final planned = store.plan!.days.first.exercises.firstWhere(
+      (e) => e.exerciseId == 'benchPress',
+    );
 
-      expect(store.suggestedWeight(planned), isNull);
+    expect(store.suggestedWeight(planned), isNull);
 
-      // Bench press is the main lift: 4 sets of 6-8. Not every set at the
-      // top of the range yet, so the trainer repeats the weight.
-      await store.addSession(
-        sessionFor('push', const [
-          SetLog(weightKg: 40, reps: 8),
-          SetLog(weightKg: 40, reps: 8),
-          SetLog(weightKg: 40, reps: 7),
-          SetLog(weightKg: 40, reps: 6),
-        ]),
-      );
-      expect(store.suggestedWeight(planned), 40);
+    // Bench press is the main lift: 4 sets of 6-8. Not every set at the
+    // top of the range yet, so the trainer repeats the weight.
+    await store.addSession(
+      sessionFor('push', const [
+        SetLog(weightKg: 40, reps: 8),
+        SetLog(weightKg: 40, reps: 8),
+        SetLog(weightKg: 40, reps: 7),
+        SetLog(weightKg: 40, reps: 6),
+      ]),
+    );
+    expect(store.suggestedWeight(planned), 40);
 
-      await store.addSession(
-        sessionFor('push', const [
-          SetLog(weightKg: 40, reps: 8),
-          SetLog(weightKg: 40, reps: 8),
-          SetLog(weightKg: 40, reps: 8),
-          SetLog(weightKg: 40, reps: 8),
-        ]),
-      );
-      expect(store.suggestedWeight(planned), 40 + progressionIncrementKg);
-    },
-  );
+    await store.addSession(
+      sessionFor('push', const [
+        SetLog(weightKg: 40, reps: 8),
+        SetLog(weightKg: 40, reps: 8),
+        SetLog(weightKg: 40, reps: 8),
+        SetLog(weightKg: 40, reps: 8),
+      ]),
+    );
+    expect(store.suggestedWeight(planned), 40 + progressionIncrementKg);
+  });
 
-  test('corrupt stored data is quarantined instead of crashing', () async {
-    SharedPreferences.setMockInitialValues({
-      'plan': 'this is not json {{{',
-      'sessions': '[{"broken": true}]',
-    });
-    final prefs = await SharedPreferences.getInstance();
-    final store = AppStore(prefs);
+  test('corrupt meta value is dropped instead of crashing', () async {
+    final db = await openTestDatabase();
+    await db.setMeta('plan', 'this is not json {{{');
+    final store = await AppStore.open(db);
 
     expect(store.hasPlan, isFalse);
-    expect(store.sessions, isEmpty);
-    expect(prefs.getString('plan'), isNull);
-    expect(
-      prefs.getKeys().where((k) => k.startsWith('corrupt.plan.')).length,
-      1,
-    );
-    expect(
-      prefs.getKeys().where((k) => k.startsWith('corrupt.sessions.')).length,
-      1,
-    );
+    // The bad row was removed, so a reopen is also clean.
+    expect((await AppStore.open(db)).hasPlan, isFalse);
   });
 
   test('workout draft persists, restores, and clears', () async {
-    SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
-    final store = AppStore(prefs);
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
     await store.saveDraft(
       WorkoutDraft(
         dayKey: 'push',
         startedAt: DateTime(2026, 7, 8, 18),
+        exerciseIndex: 1,
         sets: const {
           'benchPress': [SetLog(weightKg: 40, reps: 8)],
         },
       ),
     );
 
-    final reloaded = AppStore(prefs);
+    final reloaded = await AppStore.open(db);
     expect(reloaded.draft!.dayKey, 'push');
+    expect(reloaded.draft!.exerciseIndex, 1);
     expect(reloaded.draft!.sets['benchPress']!.single.weightKg, 40);
 
     await reloaded.clearDraft();
-    expect(AppStore(prefs).draft, isNull);
-  });
-
-  test('workout draft round-trips the resume position', () async {
-    SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
-    final store = AppStore(prefs);
-    await store.saveDraft(
-      WorkoutDraft(
-        dayKey: 'legs',
-        startedAt: DateTime(2026, 7, 9, 18),
-        exerciseIndex: 3,
-        sets: const {
-          'squat': [SetLog(weightKg: 80, reps: 6)],
-        },
-      ),
-    );
-
-    expect(AppStore(prefs).draft!.exerciseIndex, 3);
+    expect((await AppStore.open(db)).draft, isNull);
   });
 
   test('settings persist across store instances', () async {
-    SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
-    final store = AppStore(prefs);
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
     await store.setUnit(WeightUnit.lb);
     await store.setThemeMode(ThemeMode.dark);
 
-    final reloaded = AppStore(prefs);
+    final reloaded = await AppStore.open(db);
     expect(reloaded.unit, WeightUnit.lb);
     expect(reloaded.themeMode, ThemeMode.dark);
   });
 
   test('backup export/import round trip', () async {
-    final source = await makeStore();
+    final source = await openTestStore();
     await source.setPlan(
       generatePlan(
         goal: Goal.loseWeight,
@@ -187,15 +151,16 @@ void main() {
     await source.setUnit(WeightUnit.lb);
     final backup = source.exportData();
 
-    final target = await makeStore();
+    final target = await openTestStore();
     await target.importData(backup);
     expect(target.plan!.goal, Goal.loseWeight);
     expect(target.sessions.single.dayKey, 'upperA');
+    expect(target.sessions.single.logs.single.sets.single.weightKg, 60);
     expect(target.unit, WeightUnit.lb);
   });
 
   test('import rejects invalid payloads without touching data', () async {
-    final store = await makeStore();
+    final store = await openTestStore();
     await store.setPlan(
       generatePlan(goal: Goal.getFit, level: Level.beginner, daysPerWeek: 2),
     );
