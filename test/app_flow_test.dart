@@ -53,7 +53,7 @@ void main() {
     // First exercise, first-time trainer tip, log one set.
     expect(find.text('Exercise 1 of 4'), findsOneWidget);
     expect(
-      find.text('First time doing this. Start light and focus on clean form.'),
+      find.text('This is your first time. Start light and focus on good form.'),
       findsOneWidget,
     );
     // The set-logging form sits below the fold; scroll it into build range.
@@ -70,7 +70,7 @@ void main() {
     );
     await tester.enterText(find.byType(TextFormField).first, '40');
     await tester.enterText(find.byType(TextFormField).last, '10');
-    await scrollAndTap(tester, find.textContaining('Log set'));
+    await scrollAndTap(tester, find.textContaining('Save set'));
     await tester.pump();
 
     // Rest timer runs; skip it.
@@ -97,7 +97,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Summary screen with the session stats, then back home.
-    expect(find.text('WORKOUT COMPLETE'), findsOneWidget);
+    expect(find.text('WORKOUT DONE'), findsOneWidget);
     expect(find.text('1 set'), findsOneWidget);
     expect(store.sessions.length, 1);
     expect(store.sessions.first.logs.single.exerciseId, 'benchPress');
@@ -154,10 +154,10 @@ void main() {
     await tester.pumpWidget(SweatlineApp(store: store));
     await tester.pumpAndSettle();
 
-    // The Today tab opens straight on the in-progress workout with a Resume
+    // The Today tab opens straight on the in-progress workout with a Continue
     // button, skipping the warm-up page on resume.
-    expect(find.text('Resume workout'), findsOneWidget);
-    await tester.tap(find.text('Resume workout'));
+    expect(find.text('Continue workout'), findsOneWidget);
+    await tester.tap(find.text('Continue workout'));
     await settleWorkout(tester);
 
     // Resumes at the exact saved exercise, not exercise 1.

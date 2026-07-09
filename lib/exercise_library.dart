@@ -13,15 +13,15 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['shoulders', 'triceps'],
     isCompound: true,
     steps: [
-      'Lie on the bench with your eyes under the bar, feet flat on the floor.',
-      'Grip the bar slightly wider than shoulder width and unrack it over your chest.',
-      'Lower the bar under control to your mid chest, elbows about 45 degrees from your body.',
-      'Press the bar back up until your arms are straight.',
+      'Lie on the bench with your eyes under the bar and your feet flat on the floor.',
+      'Hold the bar a little wider than your shoulders and lift it off the rack, over your chest.',
+      'Lower the bar slowly to the middle of your chest. Keep your elbows about 45 degrees from your body.',
+      'Push the bar back up until your arms are straight.',
     ],
     tips: [
-      'Keep your shoulder blades pinched together on the bench.',
-      'Touch your chest lightly, never bounce the bar.',
-      'Use a spotter or safety pins when going heavy.',
+      'Pull your shoulder blades together and keep them on the bench.',
+      'Touch your chest lightly. Never bounce the bar.',
+      'When the weight is heavy, ask for a helper or use the safety bars.',
     ],
   ),
   Exercise(
@@ -33,14 +33,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['shoulders', 'triceps'],
     isCompound: true,
     steps: [
-      'Set the bench to a 30 to 45 degree incline.',
-      'Grip the bar slightly wider than shoulder width and unrack it.',
-      'Lower the bar to your upper chest under control.',
-      'Press back up until your arms are straight.',
+      'Set the bench to an angle of 30 to 45 degrees.',
+      'Hold the bar a little wider than your shoulders and lift it off the rack.',
+      'Lower the bar slowly to your upper chest.',
+      'Push back up until your arms are straight.',
     ],
     tips: [
-      'A steeper incline shifts work to the shoulders, stay near 30 degrees.',
-      'Keep your butt on the bench the whole set.',
+      'A higher angle works the shoulders more, so stay near 30 degrees.',
+      'Keep your hips on the bench for the whole set.',
     ],
   ),
   Exercise(
@@ -52,14 +52,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['shoulders', 'triceps'],
     isCompound: true,
     steps: [
-      'Sit on the bench with a dumbbell on each thigh, then lie back kicking them to your chest.',
+      'Sit on the bench with a dumbbell on each thigh. Lie back and lift them to your chest.',
       'Start with the dumbbells over your chest, palms facing forward.',
-      'Lower them out and down until your elbows pass bench level.',
-      'Press back up and slightly together at the top.',
+      'Lower them down and out until your elbows drop below the bench.',
+      'Push back up and bring the dumbbells slightly together at the top.',
     ],
     tips: [
-      'Dumbbells allow a deeper stretch than the bar, use it under control.',
-      'Do not let the dumbbells drift toward your face.',
+      'Dumbbells give a deeper stretch than the bar. Control them the whole way.',
+      'Do not let the dumbbells move toward your face.',
     ],
   ),
   Exercise(
@@ -71,14 +71,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['shoulders', 'triceps'],
     isCompound: true,
     steps: [
-      'Set the bench to a 30 degree incline and sit with dumbbells on your thighs.',
+      'Set the bench to a 30 degree angle and sit with the dumbbells on your thighs.',
       'Lie back and press the dumbbells over your upper chest.',
-      'Lower slowly until you feel a stretch across your chest.',
-      'Press back up without locking the elbows harshly.',
+      'Lower them slowly until you feel a stretch across your chest.',
+      'Push back up. Do not lock your elbows hard.',
     ],
     tips: [
-      'Keep your wrists stacked straight over your elbows.',
-      'Lower for a slow two count on every rep.',
+      'Keep your wrists straight, above your elbows.',
+      'Lower slowly, counting to two, on every rep.',
     ],
   ),
   Exercise(
@@ -89,14 +89,14 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['chest'],
     secondaryMuscles: ['shoulders'],
     steps: [
-      'Set both pulleys at chest height and grab a handle in each hand.',
-      'Step forward into a split stance with a slight bend in your elbows.',
-      'Bring your hands together in a wide arc in front of your chest.',
+      'Set both pulleys at chest height and hold a handle in each hand.',
+      'Step forward, one foot in front of the other, with a small bend in your elbows.',
+      'Bring your hands together in a wide curve in front of your chest.',
       'Return slowly until you feel a stretch in your chest.',
     ],
     tips: [
-      'Keep the same elbow bend the whole rep, this is a hug, not a press.',
-      'Squeeze your chest for a second when your hands meet.',
+      'Keep the same small elbow bend the whole time. Think of a hug, not a press.',
+      'Squeeze your chest for one second when your hands meet.',
     ],
   ),
   Exercise(
@@ -106,14 +106,14 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'machine',
     primaryMuscles: ['chest'],
     steps: [
-      'Adjust the seat so the handles sit at chest height.',
-      'Sit tall with your back flat against the pad.',
+      'Set the seat so the handles are at chest height.',
+      'Sit up straight with your back flat against the pad.',
       'Bring the handles together in front of you.',
-      'Open back up slowly to a comfortable stretch.',
+      'Open back up slowly until you feel a comfortable stretch.',
     ],
     tips: [
-      'Do not let the weight stack slam between reps.',
-      'Great as a finisher after pressing work.',
+      'Do not let the weights bang down between reps.',
+      'A good last exercise after your pressing work.',
     ],
   ),
   Exercise(
@@ -125,14 +125,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['shoulders', 'triceps', 'abs'],
     isCompound: true,
     steps: [
-      'Place your hands slightly wider than shoulder width on the floor.',
-      'Form a straight line from head to heels.',
-      'Lower your chest to just above the floor.',
+      'Put your hands on the floor, a little wider than your shoulders.',
+      'Make a straight line from your head to your heels.',
+      'Lower your chest until it is just above the floor.',
       'Push back up until your arms are straight.',
     ],
     tips: [
-      'Squeeze your glutes and abs so your hips never sag.',
-      'Too easy? Elevate your feet or add a pause at the bottom.',
+      'Squeeze your glutes and abs so your hips do not drop.',
+      'Too easy? Put your feet up higher, or stop for a moment at the bottom.',
     ],
   ),
   Exercise(
@@ -144,14 +144,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['shoulders'],
     isCompound: true,
     steps: [
-      'Grab the parallel bars and press up to straight arms.',
-      'Lean your torso slightly forward.',
-      'Lower until your upper arms are about parallel to the floor.',
-      'Press back up without locking out hard.',
+      'Hold the parallel bars and push up until your arms are straight.',
+      'Lean your upper body slightly forward.',
+      'Lower down until your upper arms are about level with the floor.',
+      'Push back up. Do not lock your arms hard.',
     ],
     tips: [
-      'The forward lean is what targets the chest over the triceps.',
-      'Stop the descent if you feel pinching in the front of the shoulder.',
+      'Leaning forward works the chest more than the triceps.',
+      'Stop going down if you feel pain in the front of your shoulder.',
     ],
   ),
 
@@ -165,16 +165,16 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['lats', 'traps', 'forearms', 'quads'],
     isCompound: true,
     steps: [
-      'Stand with the bar over your mid foot, feet hip width apart.',
-      'Hinge down and grip the bar just outside your legs.',
-      'Brace your core, flatten your back, and pull your chest up.',
-      'Drive through your legs and stand up tall, keeping the bar close.',
-      'Push your hips back and lower the bar under control.',
+      'Stand with the bar over the middle of your feet, feet about hip width apart.',
+      'Bend down from your hips and hold the bar just outside your legs.',
+      'Tighten your stomach, flatten your back, and lift your chest.',
+      'Push through your legs and stand up tall. Keep the bar close to your body.',
+      'Push your hips back and lower the bar slowly.',
     ],
     tips: [
-      'The bar should brush your legs the entire way up and down.',
-      'Never round your lower back, reset your brace before every rep.',
-      'This is the lift where form matters most, film yourself or ask for a check.',
+      'The bar should touch your legs all the way up and down.',
+      'Never let your lower back round. Tighten your stomach again before every rep.',
+      'Good form matters most here. Film yourself, or ask someone to check you.',
     ],
   ),
   Exercise(
@@ -186,13 +186,13 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['biceps', 'upperBack', 'forearms'],
     isCompound: true,
     steps: [
-      'Hang from the bar with an overhand grip slightly wider than shoulders.',
+      'Hang from the bar with your palms facing away, hands a little wider than your shoulders.',
       'Pull your shoulder blades down, then pull your chin over the bar.',
-      'Lower yourself all the way to straight arms.',
+      'Lower yourself all the way down until your arms are straight.',
     ],
     tips: [
-      'Think about driving your elbows down to your hips.',
-      'Use the assisted machine or a band if you cannot do 5 clean reps yet.',
+      'Think about pulling your elbows down to your hips.',
+      'Use the assisted machine or a band if you cannot do 5 good reps yet.',
     ],
   ),
   Exercise(
@@ -204,13 +204,13 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['upperBack', 'forearms'],
     isCompound: true,
     steps: [
-      'Hang from the bar with an underhand grip at shoulder width.',
-      'Pull your chin over the bar, leading with your chest.',
-      'Lower under control to a full hang.',
+      'Hang from the bar with your palms facing you, hands about shoulder width apart.',
+      'Pull your chin over the bar and lead with your chest.',
+      'Lower down slowly until your arms are straight.',
     ],
     tips: [
-      'The underhand grip brings the biceps in, expect to be a bit stronger than pull-ups.',
-      'Avoid swinging, keep your core tight.',
+      'Your palms facing you use the biceps more, so you will be a little stronger than on pull-ups.',
+      'Do not swing. Keep your stomach tight.',
     ],
   ),
   Exercise(
@@ -222,10 +222,10 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['biceps', 'upperBack'],
     isCompound: true,
     steps: [
-      'Sit with your thighs secured under the pads.',
-      'Grip the bar wider than shoulder width.',
-      'Pull the bar down to your upper chest while leaning back slightly.',
-      'Let the bar rise slowly to full arm extension.',
+      'Sit down and put your thighs under the pads.',
+      'Hold the bar wider than your shoulders.',
+      'Pull the bar down to your upper chest as you lean back a little.',
+      'Let the bar rise slowly until your arms are straight.',
     ],
     tips: [
       'Pull with your elbows, not your hands.',
@@ -241,14 +241,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['biceps', 'lowerBack', 'forearms'],
     isCompound: true,
     steps: [
-      'Hinge forward until your torso is about 45 degrees, knees soft.',
-      'Grip the bar shoulder width, arms hanging straight.',
-      'Row the bar to your lower ribs.',
-      'Lower under control without dropping your chest.',
+      'Bend forward from your hips to about 45 degrees, knees slightly bent.',
+      'Hold the bar about shoulder width, arms hanging straight down.',
+      'Pull the bar up to your lower ribs.',
+      'Lower it slowly. Do not drop your chest.',
     ],
     tips: [
-      'Keep your back flat, brace like the deadlift.',
-      'If you have to heave with your hips, the bar is too heavy.',
+      'Keep your back flat and tight, like in the deadlift.',
+      'If you must swing your hips to lift it, the bar is too heavy.',
     ],
   ),
   Exercise(
@@ -260,14 +260,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['biceps', 'forearms'],
     isCompound: true,
     steps: [
-      'Place one knee and the same-side hand on a bench.',
-      'Hold the dumbbell in the other hand, arm hanging straight.',
-      'Row the dumbbell to your hip, keeping your torso still.',
-      'Lower to a full stretch and repeat, then switch sides.',
+      'Put one knee and the same-side hand on a bench.',
+      'Hold the dumbbell in your other hand, arm hanging straight down.',
+      'Pull the dumbbell up to your hip. Keep your body still.',
+      'Lower it to a full stretch. Do the reps, then switch sides.',
     ],
     tips: [
-      'Row to the hip, not the shoulder, to keep the lats working.',
-      'Do not rotate your torso to lift more weight.',
+      'Pull to your hip, not your shoulder, to keep the back working.',
+      'Do not turn your body to lift more weight.',
     ],
   ),
   Exercise(
@@ -279,13 +279,13 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['biceps'],
     isCompound: true,
     steps: [
-      'Sit with your feet on the platform, knees slightly bent.',
-      'Grab the handle with a neutral grip, back upright.',
-      'Pull the handle to your stomach, squeezing your shoulder blades.',
-      'Let your arms extend fully without rounding forward.',
+      'Sit with your feet on the platform and your knees slightly bent.',
+      'Hold the handle with your palms facing each other and sit up straight.',
+      'Pull the handle to your stomach and squeeze your shoulder blades together.',
+      'Let your arms reach forward fully. Do not round your back.',
     ],
     tips: [
-      'Chest stays tall the whole set.',
+      'Keep your chest up for the whole set.',
       'Pause for one second at your stomach on every rep.',
     ],
   ),
@@ -298,14 +298,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['biceps', 'lowerBack'],
     isCompound: true,
     steps: [
-      'Straddle the bar and grip the handles with a flat back.',
-      'Keep your torso near 45 degrees.',
-      'Row the weight to your chest.',
-      'Lower slowly to a full stretch.',
+      'Stand over the bar and hold the handles with a flat back.',
+      'Keep your upper body at about 45 degrees.',
+      'Pull the weight up to your chest.',
+      'Lower it slowly to a full stretch.',
     ],
     tips: [
-      'Smaller plates give a longer range of motion.',
-      'Do not stand up as you fatigue, keep the hinge.',
+      'Smaller plates let you move through a longer range.',
+      'Do not stand up as you get tired. Keep bending forward from your hips.',
     ],
   ),
   Exercise(
@@ -316,14 +316,14 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['lats'],
     secondaryMuscles: ['triceps', 'abs'],
     steps: [
-      'Stand facing a high pulley holding the bar with straight arms.',
-      'Hinge slightly forward with a tight core.',
-      'Sweep the bar down to your thighs in an arc.',
-      'Return slowly until your arms are overhead.',
+      'Stand facing a high pulley and hold the bar with straight arms.',
+      'Bend forward a little and keep your stomach tight.',
+      'Pull the bar down to your thighs in a curve.',
+      'Return slowly until your arms are above your head.',
     ],
     tips: [
-      'Elbows stay almost straight, all motion comes from the shoulders.',
-      'Feel the stretch in your lats at the top of every rep.',
+      'Keep your arms almost straight. The movement comes from your shoulders.',
+      'Feel the stretch in your back at the top of every rep.',
     ],
   ),
   Exercise(
@@ -334,14 +334,14 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['lowerBack', 'glutes'],
     secondaryMuscles: ['hamstrings'],
     steps: [
-      'Set the pad just below your hip bones and hook your feet in.',
+      'Set the pad just below your hips and hook your feet in.',
       'Cross your arms over your chest.',
-      'Lower your torso until you feel a hamstring stretch.',
-      'Raise back up until your body forms a straight line.',
+      'Lower your upper body until you feel a stretch in the back of your legs.',
+      'Raise back up until your body is in a straight line.',
     ],
     tips: [
-      'Do not hyperextend past straight at the top.',
-      'Hold a plate against your chest to add load.',
+      'Do not bend backward past a straight line at the top.',
+      'Hold a weight plate against your chest to make it harder.',
     ],
   ),
   Exercise(
@@ -352,13 +352,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['traps'],
     secondaryMuscles: ['forearms'],
     steps: [
-      'Stand tall holding a heavy dumbbell in each hand.',
-      'Shrug your shoulders straight up toward your ears.',
-      'Hold the top for a second, then lower slowly.',
+      'Stand up straight with a heavy dumbbell in each hand.',
+      'Lift your shoulders straight up toward your ears.',
+      'Hold at the top for one second, then lower slowly.',
     ],
     tips: [
-      'Straight up and down, do not roll the shoulders.',
-      'Keep your arms relaxed, the traps do the lifting.',
+      'Move straight up and down. Do not roll your shoulders.',
+      'Keep your arms relaxed. Your traps do the work.',
     ],
   ),
 
@@ -372,14 +372,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['triceps', 'traps', 'abs'],
     isCompound: true,
     steps: [
-      'Hold the bar at shoulder height, hands just outside shoulders.',
-      'Brace your core and squeeze your glutes.',
-      'Press the bar straight overhead, moving your head back slightly.',
-      'Finish with the bar over your mid foot, then lower to your shoulders.',
+      'Hold the bar at shoulder height, hands just outside your shoulders.',
+      'Tighten your stomach and squeeze your glutes.',
+      'Push the bar straight up above your head. Move your head back a little as it passes.',
+      'Finish with the bar over the middle of your feet, then lower it to your shoulders.',
     ],
     tips: [
-      'Do not lean back to grind out reps, that turns it into an incline press.',
-      'Keep your wrists straight and elbows under the bar.',
+      'Do not lean back to force reps. That changes the exercise.',
+      'Keep your wrists straight and your elbows under the bar.',
     ],
   ),
   Exercise(
@@ -392,11 +392,11 @@ const List<Exercise> exerciseLibrary = [
     isCompound: true,
     steps: [
       'Sit on an upright bench with a dumbbell at each shoulder.',
-      'Press both dumbbells overhead until your arms are straight.',
-      'Lower under control back to shoulder height.',
+      'Push both dumbbells up above your head until your arms are straight.',
+      'Lower them slowly back to shoulder height.',
     ],
     tips: [
-      'Keep your lower back against the pad, do not arch hard.',
+      'Keep your lower back on the pad. Do not arch it much.',
       'Lower until your elbows reach about 90 degrees.',
     ],
   ),
@@ -408,13 +408,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['shoulders'],
     secondaryMuscles: ['triceps'],
     steps: [
-      'Sit holding the dumbbells at shoulder height, palms facing you.',
-      'Press up while rotating your palms to face forward.',
-      'Reverse the rotation on the way down.',
+      'Sit and hold the dumbbells at shoulder height, palms facing you.',
+      'Push up while turning your palms to face forward.',
+      'Turn your palms back as you lower down.',
     ],
     tips: [
-      'Use lighter weight than a normal press, the rotation is the point.',
-      'Move smoothly, no jerking through the twist.',
+      'Use a lighter weight than a normal press. The turning is the point.',
+      'Move smoothly. Do not jerk through the turn.',
     ],
   ),
   Exercise(
@@ -424,13 +424,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'dumbbell',
     primaryMuscles: ['shoulders'],
     steps: [
-      'Stand tall with a light dumbbell in each hand at your sides.',
-      'Raise both arms out to the sides until they reach shoulder height.',
-      'Lower slowly back to your sides.',
+      'Stand up straight with a light dumbbell in each hand at your sides.',
+      'Lift both arms out to the sides until they reach shoulder height.',
+      'Lower them slowly back to your sides.',
     ],
     tips: [
-      'Lead with your elbows, pinkies slightly up, like pouring water.',
-      'If you have to swing, the weight is too heavy. Go lighter.',
+      'Lead with your elbows, little fingers slightly up, like pouring water.',
+      'If you must swing, the weight is too heavy. Use less.',
     ],
   ),
   Exercise(
@@ -441,12 +441,12 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['shoulders'],
     steps: [
       'Hold a dumbbell in each hand in front of your thighs.',
-      'Raise one arm straight in front to shoulder height.',
-      'Lower slowly and alternate arms.',
+      'Lift one arm straight in front of you to shoulder height.',
+      'Lower it slowly, then switch arms.',
     ],
     tips: [
-      'Keep a slight elbow bend and avoid rocking your torso.',
-      'Skip it on heavy pressing days, the front delts are already worked.',
+      'Keep a small bend in your elbow and do not rock your body.',
+      'Skip this on heavy pressing days. Your front shoulders are already tired.',
     ],
   ),
   Exercise(
@@ -456,13 +456,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'dumbbell',
     primaryMuscles: ['shoulders', 'upperBack'],
     steps: [
-      'Hinge forward until your torso is near parallel with the floor.',
+      'Bend forward until your upper body is almost level with the floor.',
       'Let the dumbbells hang under your chest, palms facing each other.',
-      'Raise both arms out to the sides, squeezing your shoulder blades.',
-      'Lower slowly without standing up.',
+      'Lift both arms out to the sides and squeeze your shoulder blades together.',
+      'Lower them slowly. Do not stand up.',
     ],
     tips: [
-      'Very light weight, very strict form.',
+      'Use a very light weight and very clean form.',
       'Think about pulling your hands apart, not lifting them up.',
     ],
   ),
@@ -474,14 +474,14 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['shoulders', 'upperBack'],
     secondaryMuscles: ['traps'],
     steps: [
-      'Set a rope attachment at upper chest height.',
-      'Grab the rope ends with thumbs pointing back.',
-      'Pull the rope toward your face, splitting the ends past your ears.',
+      'Set a rope handle at upper chest height.',
+      'Hold the ends of the rope with your thumbs pointing back.',
+      'Pull the rope toward your face and split the ends past your ears.',
       'Return slowly with your shoulders down.',
     ],
     tips: [
-      'Finish each rep with your elbows high and hands beside your head.',
-      'The best insurance for healthy shoulders, do these every pull day.',
+      'Finish each rep with your elbows high and your hands beside your head.',
+      'Great for healthy shoulders. Do these on every pull day.',
     ],
   ),
   Exercise(
@@ -492,13 +492,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['shoulders', 'traps'],
     secondaryMuscles: ['biceps'],
     steps: [
-      'Stand holding a straight bar on a low pulley, hands shoulder width.',
-      'Pull the bar up along your body to chest height, elbows leading.',
-      'Lower under control.',
+      'Stand and hold a straight bar on a low pulley, hands about shoulder width apart.',
+      'Pull the bar up close to your body to chest height, leading with your elbows.',
+      'Lower it slowly.',
     ],
     tips: [
-      'Stop at chest height, pulling higher can pinch the shoulder.',
-      'A wider grip is friendlier to the wrists and shoulders.',
+      'Stop at chest height. Pulling higher can hurt the shoulder.',
+      'A wider grip is easier on the wrists and shoulders.',
     ],
   ),
 
@@ -513,11 +513,11 @@ const List<Exercise> exerciseLibrary = [
     steps: [
       'Stand with a dumbbell in each hand, palms facing forward.',
       'Curl both dumbbells up to shoulder height.',
-      'Lower slowly all the way to straight arms.',
+      'Lower them slowly, all the way down, until your arms are straight.',
     ],
     tips: [
-      'Pin your elbows to your sides, only the forearms move.',
-      'The slow lowering builds as much muscle as the lift.',
+      'Keep your elbows at your sides. Only your forearms move.',
+      'Lowering slowly builds as much muscle as lifting.',
     ],
   ),
   Exercise(
@@ -528,12 +528,12 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['biceps'],
     secondaryMuscles: ['forearms'],
     steps: [
-      'Hold the bar at shoulder width, palms up.',
-      'Curl the bar to your shoulders without moving your elbows.',
-      'Lower under control to straight arms.',
+      'Hold the bar about shoulder width, palms up.',
+      'Curl the bar up to your shoulders without moving your elbows.',
+      'Lower it slowly until your arms are straight.',
     ],
     tips: [
-      'No hip swing. If you must cheat, the bar is too heavy.',
+      'Do not swing your hips. If you must swing to lift it, the bar is too heavy.',
       'An EZ-curl bar is easier on the wrists.',
     ],
   ),
@@ -544,13 +544,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'dumbbell',
     primaryMuscles: ['biceps', 'forearms'],
     steps: [
-      'Hold the dumbbells at your sides with palms facing your body.',
-      'Curl up keeping the neutral grip the whole way.',
-      'Lower slowly.',
+      'Hold the dumbbells at your sides with your palms facing your body.',
+      'Curl them up while keeping your palms facing each other.',
+      'Lower them slowly.',
     ],
     tips: [
       'Builds the forearms and the thickness of the upper arm.',
-      'Can be done alternating or both arms together.',
+      'You can do both arms together or one at a time.',
     ],
   ),
   Exercise(
@@ -560,13 +560,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'machine',
     primaryMuscles: ['biceps'],
     steps: [
-      'Sit with the backs of your upper arms flat on the preacher pad.',
+      'Sit with the backs of your upper arms flat on the pad.',
       'Curl the weight up toward your shoulders.',
-      'Lower slowly until your arms are almost straight.',
+      'Lower it slowly until your arms are almost straight.',
     ],
     tips: [
-      'Do not bounce out of the bottom, that strains the elbow.',
-      'The pad removes cheating, expect to lift less than a standing curl.',
+      'Do not bounce at the bottom. It can hurt the elbow.',
+      'The pad stops swinging, so you will lift less than in a standing curl.',
     ],
   ),
   Exercise(
@@ -576,13 +576,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'dumbbell',
     primaryMuscles: ['biceps'],
     steps: [
-      'Sit on a bench, elbow braced against your inner thigh.',
-      'Curl the dumbbell to your shoulder.',
-      'Lower slowly to a full stretch.',
+      'Sit on a bench and rest your elbow against your inner thigh.',
+      'Curl the dumbbell up to your shoulder.',
+      'Lower it slowly to a full stretch.',
     ],
     tips: [
-      'Watch the bicep work, focus improves the contraction.',
-      'Strict and slow beats heavy and sloppy here.',
+      'Watch your bicep work. Focus helps the squeeze.',
+      'Slow and clean is better than heavy and messy here.',
     ],
   ),
   Exercise(
@@ -593,13 +593,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['biceps'],
     secondaryMuscles: ['forearms'],
     steps: [
-      'Attach a straight bar to the low pulley and grip palms up.',
-      'Curl the bar to your shoulders, elbows pinned.',
-      'Lower under control against the cable tension.',
+      'Attach a straight bar to the low pulley and hold it with palms up.',
+      'Curl the bar up to your shoulders with your elbows at your sides.',
+      'Lower it slowly against the pull of the cable.',
     ],
     tips: [
-      'The cable keeps tension at the bottom where dumbbells rest.',
-      'Great as the last biceps exercise of the day.',
+      'The cable keeps the muscle working at the bottom, where dumbbells go easy.',
+      'A good last biceps exercise for the day.',
     ],
   ),
   Exercise(
@@ -609,13 +609,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'cable',
     primaryMuscles: ['triceps'],
     steps: [
-      'Face a high pulley with a rope attachment, elbows at your sides.',
-      'Push the rope down until your arms are straight, splitting the ends.',
-      'Let the rope rise until your forearms pass parallel.',
+      'Face a high pulley with a rope handle, elbows at your sides.',
+      'Push the rope down until your arms are straight, splitting the ends apart.',
+      'Let the rope rise until your forearms pass level with the floor.',
     ],
     tips: [
-      'Elbows stay glued to your ribs the entire set.',
-      'Lean slightly forward but keep your back straight.',
+      'Keep your elbows against your sides the whole set.',
+      'Lean forward a little but keep your back straight.',
     ],
   ),
   Exercise(
@@ -625,13 +625,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'barbell',
     primaryMuscles: ['triceps'],
     steps: [
-      'Lie on a bench holding the bar over your chest, narrow grip.',
-      'Bend only at the elbows, lowering the bar toward your forehead.',
-      'Extend back up to straight arms.',
+      'Lie on a bench and hold the bar over your chest with a narrow grip.',
+      'Bend only at your elbows and lower the bar toward your forehead.',
+      'Straighten your arms back up.',
     ],
     tips: [
-      'Lower to the top of your head or just behind it, slowly.',
-      'Drop the weight, not your guard. This one punishes sloppy form.',
+      'Lower slowly to the top of your head, or just behind it.',
+      'Use a light weight and stay careful. Messy form can hurt your elbows.',
     ],
   ),
   Exercise(
@@ -641,13 +641,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'dumbbell',
     primaryMuscles: ['triceps'],
     steps: [
-      'Hold one dumbbell with both hands overhead.',
-      'Lower it behind your head by bending the elbows.',
-      'Extend back up to straight arms.',
+      'Hold one dumbbell with both hands above your head.',
+      'Lower it behind your head by bending your elbows.',
+      'Straighten your arms back up.',
     ],
     tips: [
-      'Keep your elbows pointing forward, not flaring out.',
-      'The overhead stretch hits the long head other extensions miss.',
+      'Keep your elbows pointing forward, not out to the sides.',
+      'This position works a part of the triceps that other exercises miss.',
     ],
   ),
   Exercise(
@@ -659,13 +659,13 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['chest', 'shoulders'],
     isCompound: true,
     steps: [
-      'Lie on the bench and grip the bar at shoulder width.',
-      'Lower the bar to your lower chest, elbows close to your body.',
-      'Press back up focusing on pushing with the triceps.',
+      'Lie on the bench and hold the bar about shoulder width apart.',
+      'Lower the bar to your lower chest with your elbows close to your body.',
+      'Push back up and focus on using your triceps.',
     ],
     tips: [
-      'Shoulder width, not hands touching. Too narrow hurts the wrists.',
-      'The heaviest triceps builder you can do.',
+      'Use a shoulder-width grip, not hands together. Too narrow hurts the wrists.',
+      'This trains your triceps with the most weight.',
     ],
   ),
 
@@ -680,14 +680,14 @@ const List<Exercise> exerciseLibrary = [
     isCompound: true,
     steps: [
       'Rest the bar on your upper back and step out of the rack.',
-      'Set your feet shoulder width, toes slightly out.',
-      'Brace, then sit down between your legs until your thighs pass parallel.',
-      'Drive back up through your whole foot.',
+      'Set your feet about shoulder width apart, toes turned out a little.',
+      'Tighten your stomach, then sit down until your thighs drop below your knees.',
+      'Push back up through your whole foot.',
     ],
     tips: [
-      'Knees track in line with your toes, never caving inward.',
-      'Keep your whole foot planted, heels never rise.',
-      'Depth first, weight second.',
+      'Keep your knees in line with your toes. Do not let them fall inward.',
+      'Keep your whole foot on the floor. Your heels should not rise.',
+      'Learn to go deep first. Add weight later.',
     ],
   ),
   Exercise(
@@ -699,14 +699,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['glutes', 'abs', 'upperBack'],
     isCompound: true,
     steps: [
-      'Rest the bar on your front shoulders, elbows high.',
-      'Keep your torso as upright as possible.',
-      'Squat down until your thighs pass parallel.',
-      'Drive up keeping your elbows lifted.',
+      'Rest the bar on the front of your shoulders with your elbows high.',
+      'Keep your upper body as straight as you can.',
+      'Squat down until your thighs drop below your knees.',
+      'Push up and keep your elbows high.',
     ],
     tips: [
-      'If your wrists are tight, use a cross-arm grip or straps.',
-      'Elbows dropping means the weight is about to fall forward.',
+      'If your wrists feel tight, cross your arms or use straps.',
+      'If your elbows drop, the weight will fall forward.',
     ],
   ),
   Exercise(
@@ -718,13 +718,13 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['abs'],
     isCompound: true,
     steps: [
-      'Hold a dumbbell vertically against your chest with both hands.',
-      'Squat down between your knees, elbows inside your thighs.',
+      'Hold one dumbbell straight up against your chest with both hands.',
+      'Squat down between your knees with your elbows inside your thighs.',
       'Stand back up tall.',
     ],
     tips: [
-      'The best squat to learn depth and posture, perfect for beginners.',
-      'Keep your chest tall against the counterweight.',
+      'A great squat for learning depth and good posture. Perfect for beginners.',
+      'Keep your chest up. The weight in front helps you balance.',
     ],
   ),
   Exercise(
@@ -736,13 +736,13 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['hamstrings'],
     isCompound: true,
     steps: [
-      'Sit in the machine with your feet shoulder width on the platform.',
-      'Release the safeties and lower the platform toward your chest.',
-      'Press back up without fully locking your knees.',
+      'Sit in the machine with your feet about shoulder width on the platform.',
+      'Release the safety locks and lower the platform toward your chest.',
+      'Push back up. Do not lock your knees fully.',
     ],
     tips: [
-      'Never let your lower back curl off the pad at the bottom.',
-      'Higher foot placement hits more glutes and hamstrings.',
+      'Never let your lower back lift off the pad at the bottom.',
+      'Placing your feet higher works more glutes and hamstrings.',
     ],
   ),
   Exercise(
@@ -754,13 +754,13 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['glutes'],
     isCompound: true,
     steps: [
-      'Position your shoulders under the pads, feet shoulder width.',
-      'Release the handles and squat down until your thighs pass parallel.',
-      'Drive back up through your whole foot.',
+      'Put your shoulders under the pads, feet about shoulder width apart.',
+      'Release the handles and squat down until your thighs drop below your knees.',
+      'Push back up through your whole foot.',
     ],
     tips: [
-      'A lower foot placement emphasizes the quads more.',
-      'Control the descent, do not dive-bomb into the bottom.',
+      'Placing your feet lower works the quads more.',
+      'Go down slowly. Do not drop fast into the bottom.',
     ],
   ),
   Exercise(
@@ -772,14 +772,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['lowerBack', 'forearms'],
     isCompound: true,
     steps: [
-      'Hold the bar at your thighs, feet hip width.',
-      'Push your hips straight back, sliding the bar down your legs.',
-      'Stop when you feel a deep hamstring stretch, around mid shin.',
-      'Drive your hips forward to stand tall.',
+      'Hold the bar at your thighs, feet about hip width apart.',
+      'Push your hips straight back and slide the bar down your legs.',
+      'Stop when you feel a strong stretch in the back of your legs, around mid shin.',
+      'Push your hips forward to stand up tall.',
     ],
     tips: [
-      'Knees stay softly bent, this is a hinge, not a squat.',
-      'Flat back always. Shorten the range before you round.',
+      'Keep your knees slightly bent. You bend from the hips, not into a squat.',
+      'Keep your back flat. Move a shorter distance before you let it round.',
     ],
   ),
   Exercise(
@@ -790,12 +790,12 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['hamstrings'],
     steps: [
       'Lie face down with the pad against your lower calves.',
-      'Curl your heels toward your glutes.',
-      'Lower slowly to straight legs.',
+      'Bend your knees and pull your heels toward your glutes.',
+      'Lower slowly until your legs are straight.',
     ],
     tips: [
-      'Keep your hips pressed into the bench the whole set.',
-      'Pause for a second at the top of each rep.',
+      'Keep your hips pressed into the bench for the whole set.',
+      'Pause for one second at the top of each rep.',
     ],
   ),
   Exercise(
@@ -805,13 +805,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'machine',
     primaryMuscles: ['quads'],
     steps: [
-      'Sit with the pad on your lower shins, knees lined up with the pivot.',
-      'Extend your legs until they are straight.',
-      'Lower slowly without letting the stack slam.',
+      'Sit with the pad on your lower shins, knees lined up with the machine.',
+      'Straighten your legs fully.',
+      'Lower slowly. Do not let the weights bang down.',
     ],
     tips: [
-      'Squeeze hard for a second at full extension.',
-      'Moderate weight and clean reps, this is a finisher, not a max lift.',
+      'Squeeze hard for one second when your legs are straight.',
+      'Use a medium weight and clean reps. This is a finishing exercise, not a max lift.',
     ],
   ),
   Exercise(
@@ -824,11 +824,11 @@ const List<Exercise> exerciseLibrary = [
     isCompound: true,
     steps: [
       'Hold a dumbbell in each hand at your sides.',
-      'Step forward and lower until both knees reach 90 degrees.',
-      'Push through the front foot and step into the next lunge.',
+      'Step forward and lower down until both knees are at 90 degrees.',
+      'Push through your front foot and step into the next lunge.',
     ],
     tips: [
-      'Your front knee should track over your foot, not past your toes.',
+      'Your front knee should stay over your foot, not go past your toes.',
       'Take slightly longer steps to feel more glutes.',
     ],
   ),
@@ -841,14 +841,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['hamstrings'],
     isCompound: true,
     steps: [
-      'Stand a big step in front of a bench, rear foot resting on it.',
+      'Stand one big step in front of a bench, with your back foot resting on it.',
       'Hold a dumbbell in each hand.',
-      'Lower straight down until your front thigh is parallel.',
-      'Drive up through the front foot. Finish the set, then switch legs.',
+      'Lower straight down until your front thigh is level with the floor.',
+      'Push up through your front foot. Do the reps, then switch legs.',
     ],
     tips: [
-      'Everyone hates these because they work. Stick with them.',
-      'Stay upright for quads, lean slightly forward for glutes.',
+      'These are hard, but they work well. Keep doing them.',
+      'Stay upright for the quads, or lean forward a little for the glutes.',
     ],
   ),
   Exercise(
@@ -860,14 +860,14 @@ const List<Exercise> exerciseLibrary = [
     secondaryMuscles: ['hamstrings'],
     isCompound: true,
     steps: [
-      'Sit with your upper back against a bench, bar over your hips.',
-      'Plant your feet flat, shoulder width.',
-      'Drive your hips up until your body is a straight line.',
-      'Squeeze your glutes hard, then lower under control.',
+      'Sit with your upper back against a bench and the bar over your hips.',
+      'Put your feet flat on the floor, about shoulder width apart.',
+      'Push your hips up until your body is in a straight line.',
+      'Squeeze your glutes hard, then lower slowly.',
     ],
     tips: [
-      'Use a bar pad, your hip bones will thank you.',
-      'Chin tucked, ribs down. Do not arch your lower back at the top.',
+      'Use a pad on the bar. It protects your hip bones.',
+      'Keep your chin and ribs down. Do not arch your lower back at the top.',
     ],
   ),
   Exercise(
@@ -877,13 +877,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'machine',
     primaryMuscles: ['calves'],
     steps: [
-      'Stand with the balls of your feet on the platform, heels hanging.',
-      'Lower your heels for a deep stretch.',
-      'Rise up onto your toes as high as possible.',
+      'Stand with the front of your feet on the platform and your heels hanging off.',
+      'Lower your heels down for a deep stretch.',
+      'Rise up onto your toes as high as you can.',
     ],
     tips: [
-      'Pause two seconds in the stretch, no bouncing.',
-      'Calves respond to full range and patience, not weight.',
+      'Pause for two seconds in the stretch. Do not bounce.',
+      'Calves grow with full range and patience, not heavy weight.',
     ],
   ),
   Exercise(
@@ -893,13 +893,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'machine',
     primaryMuscles: ['calves'],
     steps: [
-      'Sit with the pads on your knees, balls of feet on the platform.',
-      'Lower your heels to a full stretch.',
-      'Press up onto your toes and squeeze.',
+      'Sit with the pads on your knees and the front of your feet on the platform.',
+      'Lower your heels down to a full stretch.',
+      'Push up onto your toes and squeeze.',
     ],
     tips: [
-      'The bent knee targets the deeper soleus muscle.',
-      'Slow reps, full range, every time.',
+      'The bent knee works the deeper calf muscle.',
+      'Slow reps and full range, every time.',
     ],
   ),
 
@@ -912,13 +912,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['abs'],
     secondaryMuscles: ['obliques', 'shoulders'],
     steps: [
-      'Rest on your forearms and toes, elbows under shoulders.',
-      'Form a straight line from head to heels.',
-      'Hold while breathing steadily. Log the seconds you held as reps.',
+      'Rest on your forearms and toes, with your elbows under your shoulders.',
+      'Make a straight line from your head to your heels.',
+      'Hold and breathe steadily. Count the seconds you hold as your reps.',
     ],
     tips: [
-      'Squeeze glutes and abs, do not let the hips sag or pike.',
-      'A shorter, perfect hold beats a long, saggy one.',
+      'Squeeze your glutes and abs. Do not let your hips drop or rise.',
+      'A short, perfect hold is better than a long, sagging one.',
     ],
   ),
   Exercise(
@@ -929,13 +929,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['obliques'],
     secondaryMuscles: ['abs', 'shoulders'],
     steps: [
-      'Lie on your side, propped on one forearm, elbow under shoulder.',
-      'Lift your hips so your body forms a straight line.',
-      'Hold, then switch sides. Log the seconds per side as reps.',
+      'Lie on your side, resting on one forearm, with your elbow under your shoulder.',
+      'Lift your hips so your body makes a straight line.',
+      'Hold, then switch sides. Count the seconds on each side as your reps.',
     ],
     tips: [
-      'Push the floor away, do not hang on the shoulder.',
-      'Stack your feet or stagger them for more balance.',
+      'Push the floor away. Do not rest on your shoulder.',
+      'Stack your feet, or put one in front of the other, for balance.',
     ],
   ),
   Exercise(
@@ -945,13 +945,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'bodyweight',
     primaryMuscles: ['abs'],
     steps: [
-      'Lie on your back with knees bent, hands lightly behind your head.',
-      'Curl your shoulder blades off the floor.',
-      'Lower slowly without pulling on your neck.',
+      'Lie on your back with your knees bent and your hands lightly behind your head.',
+      'Lift your shoulder blades off the floor.',
+      'Lower slowly. Do not pull on your neck.',
     ],
     tips: [
-      'Exhale hard as you crunch up.',
-      'Small range done well, this is not a sit-up.',
+      'Breathe out hard as you lift up.',
+      'Use a small, controlled movement. This is not a full sit-up.',
     ],
   ),
   Exercise(
@@ -961,13 +961,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'cable',
     primaryMuscles: ['abs'],
     steps: [
-      'Kneel below a high pulley holding the rope beside your head.',
-      'Crunch your elbows toward your knees, rounding your spine.',
+      'Kneel below a high pulley and hold the rope beside your head.',
+      'Crunch your elbows toward your knees and round your back.',
       'Return slowly until your abs are stretched.',
     ],
     tips: [
-      'Your hips stay still, the abs curl the spine.',
-      'The one ab exercise you can keep adding weight to.',
+      'Keep your hips still. Your abs round your back.',
+      'This is the ab exercise where you can keep adding weight.',
     ],
   ),
   Exercise(
@@ -978,13 +978,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['abs'],
     secondaryMuscles: ['obliques', 'forearms'],
     steps: [
-      'Hang from a pull-up bar with straight arms.',
-      'Raise your legs until your thighs pass parallel.',
-      'Lower slowly without swinging.',
+      'Hang from a pull-up bar with your arms straight.',
+      'Lift your legs until your thighs are level with the floor.',
+      'Lower them slowly. Do not swing.',
     ],
     tips: [
-      'Tilt your pelvis up at the top, do not just lift the legs.',
-      'Too hard? Start with bent-knee raises.',
+      'Roll your hips up at the top. Do not just lift your legs.',
+      'Too hard? Start with your knees bent.',
     ],
   ),
   Exercise(
@@ -995,12 +995,12 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['obliques'],
     secondaryMuscles: ['abs'],
     steps: [
-      'Sit with knees bent, leaning back until your abs engage.',
-      'Hold a plate or dumbbell with both hands.',
-      'Rotate the weight side to side, touching near each hip.',
+      'Sit with your knees bent and lean back until you feel your abs work.',
+      'Hold a weight plate or dumbbell with both hands.',
+      'Turn the weight from side to side, touching near each hip.',
     ],
     tips: [
-      'Rotate from the ribs, not just the arms.',
+      'Turn from your ribs, not just your arms.',
       'Lift your feet off the floor to make it harder.',
     ],
   ),
@@ -1012,13 +1012,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['abs'],
     secondaryMuscles: ['obliques', 'lats', 'shoulders'],
     steps: [
-      'Kneel holding the ab wheel under your shoulders.',
-      'Roll forward as far as you can keep your back flat.',
+      'Kneel and hold the ab wheel under your shoulders.',
+      'Roll forward as far as you can while keeping your back flat.',
       'Pull back to the start using your abs.',
     ],
     tips: [
-      'Tuck your pelvis and squeeze your glutes before rolling.',
-      'Only roll as far as you can control, range grows with strength.',
+      'Roll your hips under and squeeze your glutes before you roll out.',
+      'Only roll as far as you can control. You will reach farther as you get stronger.',
     ],
   ),
   Exercise(
@@ -1028,13 +1028,13 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'bodyweight',
     primaryMuscles: ['abs'],
     steps: [
-      'Lie on your back, arms up, knees bent at 90 degrees over hips.',
+      'Lie on your back with your arms up and your knees bent at 90 degrees over your hips.',
       'Lower one arm and the opposite leg toward the floor.',
-      'Return and repeat with the other pair.',
+      'Bring them back, then repeat with the other arm and leg.',
     ],
     tips: [
-      'Press your lower back into the floor the entire time.',
-      'Slow is the whole point. Two seconds out, two seconds back.',
+      'Press your lower back into the floor the whole time.',
+      'Going slowly is the point. Two seconds out, two seconds back.',
     ],
   ),
 
@@ -1047,13 +1047,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['quads', 'hamstrings', 'calves'],
     secondaryMuscles: ['glutes'],
     steps: [
-      'Start walking, then raise the speed to an easy jog.',
-      'Run tall with relaxed shoulders and a slight forward lean.',
-      'Log minutes as reps.',
+      'Start by walking, then raise the speed to an easy jog.',
+      'Run tall with relaxed shoulders and a small forward lean.',
+      'Count the minutes as your reps.',
     ],
     tips: [
-      'You should be able to speak in short sentences at an easy pace.',
-      'A 1 percent incline mimics outdoor running.',
+      'At an easy pace, you should be able to speak in short sentences.',
+      'A 1 percent slope feels like running outside.',
     ],
   ),
   Exercise(
@@ -1064,14 +1064,14 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['upperBack', 'lats', 'quads'],
     secondaryMuscles: ['biceps', 'hamstrings', 'abs'],
     steps: [
-      'Strap in and grab the handle with straight arms.',
-      'Drive with the legs first, then lean back, then pull to your chest.',
-      'Reverse the order on the way forward: arms, body, legs.',
-      'Log minutes as reps.',
+      'Strap your feet in and hold the handle with straight arms.',
+      'Push with your legs first, then lean back, then pull the handle to your chest.',
+      'On the way forward, do the reverse: arms, then body, then legs.',
+      'Count the minutes as your reps.',
     ],
     tips: [
-      'Order matters: legs, back, arms. Most beginners pull arms first.',
-      'Power comes from the legs, about 60 percent of every stroke.',
+      'The order matters: legs, back, arms. Most beginners pull with the arms first.',
+      'Most power comes from your legs, about 60 percent of each pull.',
     ],
   ),
   Exercise(
@@ -1082,13 +1082,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['quads'],
     secondaryMuscles: ['hamstrings', 'calves', 'glutes'],
     steps: [
-      'Set the saddle so your knee stays slightly bent at the bottom.',
-      'Pedal at a steady, conversational effort.',
-      'Log minutes as reps.',
+      'Set the seat so your knee stays slightly bent at the bottom.',
+      'Pedal at a steady, easy effort where you can still talk.',
+      'Count the minutes as your reps.',
     ],
     tips: [
-      'The easiest cardio on the joints, perfect for recovery days.',
-      'Alternate 30 hard and 90 easy seconds for intervals.',
+      'This is easy on your joints. Good for rest days.',
+      'For intervals, go 30 seconds hard, then 90 seconds easy.',
     ],
   ),
   Exercise(
@@ -1099,14 +1099,14 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['calves'],
     secondaryMuscles: ['quads', 'shoulders', 'forearms'],
     steps: [
-      'Hold the handles at hip height, elbows close to your body.',
-      'Jump just high enough to clear the rope, landing softly.',
-      'Spin the rope from the wrists, not the arms.',
-      'Log minutes as reps.',
+      'Hold the handles at hip height with your elbows close to your body.',
+      'Jump just high enough to clear the rope and land softly.',
+      'Spin the rope with your wrists, not your arms.',
+      'Count the minutes as your reps.',
     ],
     tips: [
-      'Small, quick hops on the balls of your feet.',
-      'Trip? Just keep going, rhythm comes within a week.',
+      'Do small, quick hops on the front of your feet.',
+      'Miss a jump? Keep going. Your rhythm will come within a week.',
     ],
   ),
   Exercise(
@@ -1117,13 +1117,13 @@ const List<Exercise> exerciseLibrary = [
     primaryMuscles: ['quads', 'chest'],
     secondaryMuscles: ['abs', 'shoulders', 'triceps'],
     steps: [
-      'Squat down and place your hands on the floor.',
-      'Kick your feet back to a push-up position and do a push-up.',
-      'Jump your feet back in and leap straight up.',
+      'Squat down and put your hands on the floor.',
+      'Kick your feet back into a push-up position and do a push-up.',
+      'Jump your feet back in and jump straight up.',
     ],
     tips: [
-      'Pace yourself, smooth reps beat frantic ones.',
-      'Skip the push-up or the jump to scale it down.',
+      'Keep a steady pace. Smooth reps are better than fast, wild ones.',
+      'Skip the push-up or the jump to make it easier.',
     ],
   ),
 ];
