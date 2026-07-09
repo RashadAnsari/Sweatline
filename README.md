@@ -53,6 +53,12 @@ flutter test --update-goldens --tags golden test/tools/app_icon_test.dart
 dart run flutter_launcher_icons
 ```
 
+### Release signing
+
+Android release builds require a local `android/key.properties` file. Copy
+`android/key.properties.example`, fill in the keystore values, and keep the
+real file out of git.
+
 ## Architecture
 
 Single local store (`lib/store.dart`, a `ChangeNotifier` over SQLite via

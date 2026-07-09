@@ -511,7 +511,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
                     shape: BoxShape.circle,
                     color: i < _currentSets.length
                         ? colorScheme.primary
-                        : Colors.transparent,
+                        : colorScheme.surface.withAlpha(0),
                     border: Border.all(
                       color: i < _currentSets.length
                           ? colorScheme.primary

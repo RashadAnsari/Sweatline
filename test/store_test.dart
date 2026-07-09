@@ -54,43 +54,46 @@ void main() {
     expect(store.todayPlanDay.key, 'push');
   });
 
-  test('suggestedWeight repeats last weight until all sets hit top reps', () async {
-    final store = await openTestStore();
-    await store.setPlan(
-      generatePlan(
-        goal: Goal.buildMuscle,
-        level: Level.beginner,
-        daysPerWeek: 3,
-      ),
-    );
-    final planned = store.plan!.days.first.exercises.firstWhere(
-      (e) => e.exerciseId == 'benchPress',
-    );
+  test(
+    'suggestedWeight repeats last weight until all sets hit top reps',
+    () async {
+      final store = await openTestStore();
+      await store.setPlan(
+        generatePlan(
+          goal: Goal.buildMuscle,
+          level: Level.beginner,
+          daysPerWeek: 3,
+        ),
+      );
+      final planned = store.plan!.days.first.exercises.firstWhere(
+        (e) => e.exerciseId == 'benchPress',
+      );
 
-    expect(store.suggestedWeight(planned), isNull);
+      expect(store.suggestedWeight(planned), isNull);
 
-    // Bench press is the main lift: 4 sets of 6-8. Not every set at the
-    // top of the range yet, so the trainer repeats the weight.
-    await store.addSession(
-      sessionFor('push', const [
-        SetLog(weightKg: 40, reps: 8),
-        SetLog(weightKg: 40, reps: 8),
-        SetLog(weightKg: 40, reps: 7),
-        SetLog(weightKg: 40, reps: 6),
-      ]),
-    );
-    expect(store.suggestedWeight(planned), 40);
+      // Bench press is the main lift: 4 sets of 6-8. Not every set at the
+      // top of the range yet, so the trainer repeats the weight.
+      await store.addSession(
+        sessionFor('push', const [
+          SetLog(weightKg: 40, reps: 8),
+          SetLog(weightKg: 40, reps: 8),
+          SetLog(weightKg: 40, reps: 7),
+          SetLog(weightKg: 40, reps: 6),
+        ]),
+      );
+      expect(store.suggestedWeight(planned), 40);
 
-    await store.addSession(
-      sessionFor('push', const [
-        SetLog(weightKg: 40, reps: 8),
-        SetLog(weightKg: 40, reps: 8),
-        SetLog(weightKg: 40, reps: 8),
-        SetLog(weightKg: 40, reps: 8),
-      ]),
-    );
-    expect(store.suggestedWeight(planned), 40 + progressionIncrementKg);
-  });
+      await store.addSession(
+        sessionFor('push', const [
+          SetLog(weightKg: 40, reps: 8),
+          SetLog(weightKg: 40, reps: 8),
+          SetLog(weightKg: 40, reps: 8),
+          SetLog(weightKg: 40, reps: 8),
+        ]),
+      );
+      expect(store.suggestedWeight(planned), 40 + progressionIncrementKg);
+    },
+  );
 
   test('corrupt meta value is dropped instead of crashing', () async {
     final db = await openTestDatabase();

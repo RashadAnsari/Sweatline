@@ -150,7 +150,7 @@ class _WeekDots extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: trained
                               ? colorScheme.primary
-                              : Colors.transparent,
+                              : colorScheme.surface.withAlpha(0),
                           border: Border.all(
                             color: trained
                                 ? colorScheme.primary

@@ -208,7 +208,7 @@ class _TodayTabState extends State<_TodayTab> {
                           shape: BoxShape.circle,
                           color: i < weeklyDone
                               ? colorScheme.primary
-                              : Colors.transparent,
+                              : colorScheme.surface.withAlpha(0),
                           border: Border.all(
                             color: i < weeklyDone
                                 ? colorScheme.primary
