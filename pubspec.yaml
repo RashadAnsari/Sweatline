@@ -21,6 +21,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
 
 flutter:
   uses-material-design: true
@@ -38,3 +39,18 @@ flutter_launcher_icons:
   ios: true
   image_path: assets/icon/app_icon.png
   remove_alpha_ios: true
+
+# Native splash screen shown before Flutter boots. This replaces the blank
+# white launch screen. The logo is assets/splash/splash_logo.png, produced
+# by test/tools/splash_logo_test.dart (run with --update-goldens).
+# Regenerate the native splash with: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#12140D"
+  color_dark: "#12140D"
+  image: assets/splash/splash_logo.png
+  image_dark: assets/splash/splash_logo.png
+  android_12:
+    color: "#12140D"
+    color_dark: "#12140D"
+    image: assets/splash/splash_logo.png
+    image_dark: assets/splash/splash_logo.png
