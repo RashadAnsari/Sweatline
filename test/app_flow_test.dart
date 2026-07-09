@@ -84,6 +84,15 @@ void main() {
       await settleWorkout(tester);
     }
     expect(find.text('Exercise 4 of 4'), findsOneWidget);
+
+    // Step back to the previous exercise and forward again.
+    await scrollAndTap(tester, find.text('Previous'));
+    await settleWorkout(tester);
+    expect(find.text('Exercise 3 of 4'), findsOneWidget);
+    await scrollAndTap(tester, find.text('Next exercise'));
+    await settleWorkout(tester);
+    expect(find.text('Exercise 4 of 4'), findsOneWidget);
+
     await scrollAndTap(tester, find.text('Finish workout'));
     await tester.pumpAndSettle();
 
@@ -106,6 +115,16 @@ void main() {
     await tester.tap(find.text('Today'));
     await tester.pumpAndSettle();
     expect(find.text('Pull Day'), findsOneWidget);
+
+    // Browse the other workouts of the plan from the Today tab.
+    await tester.tap(find.byTooltip('Next workout'));
+    await tester.pumpAndSettle();
+    expect(find.text('Leg Day'), findsOneWidget);
+    expect(find.text('IN YOUR PLAN'), findsOneWidget);
+    await tester.tap(find.byTooltip('Previous workout'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pull Day'), findsOneWidget);
+    expect(find.text("TODAY'S WORKOUT"), findsOneWidget);
   });
 
   testWidgets('an interrupted workout is offered for resume and restores '

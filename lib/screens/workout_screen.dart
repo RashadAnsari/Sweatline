@@ -191,6 +191,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     setState(() => _weightController.text = formatWeight(next));
   }
 
+  void _bumpReps(int delta) {
+    final current = _parseReps(_repsController.text) ?? _planned.repsMin;
+    final next = (current + delta).clamp(1, 99);
+    setState(() => _repsController.text = '$next');
+  }
+
   void _startRest() {
     _restTicker?.cancel();
     _restEndsAt = DateTime.now().add(Duration(seconds: _planned.restSeconds));
@@ -210,10 +216,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     _restEndsAt = null;
   }
 
-  void _nextExercise() {
+  void _nextExercise() => _goToExercise(_exerciseIndex + 1);
+
+  void _previousExercise() => _goToExercise(_exerciseIndex - 1);
+
+  void _goToExercise(int index) {
     setState(() {
       _stopRest();
-      _exerciseIndex++;
+      _exerciseIndex = index;
       _weightController.clear();
       _repsController.clear();
       _prefillInputs();
@@ -594,9 +604,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       icon: const Icon(Icons.remove),
                       padding: const EdgeInsets.all(14),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Expanded(
-                      flex: 3,
                       child: TextFormField(
                         controller: _weightController,
                         textAlign: TextAlign.center,
@@ -614,15 +623,25 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                         },
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     IconButton.filledTonal(
                       onPressed: () => _bumpWeight(2.5),
                       icon: const Icon(Icons.add),
                       padding: const EdgeInsets.all(14),
                     ),
-                    const SizedBox(width: 10),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IconButton.filledTonal(
+                      onPressed: () => _bumpReps(-1),
+                      icon: const Icon(Icons.remove),
+                      padding: const EdgeInsets.all(14),
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
-                      flex: 2,
                       child: TextFormField(
                         controller: _repsController,
                         textAlign: TextAlign.center,
@@ -637,6 +656,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                               : null;
                         },
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      onPressed: () => _bumpReps(1),
+                      icon: const Icon(Icons.add),
+                      padding: const EdgeInsets.all(14),
                     ),
                   ],
                 ),
@@ -668,6 +693,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             icon: const Icon(Icons.arrow_forward),
             label: Text(l10n.nextExercise),
           ),
+        if (_exerciseIndex > 0) ...[
+          const SizedBox(height: 10),
+          FilledButton.tonalIcon(
+            onPressed: _previousExercise,
+            icon: const Icon(Icons.arrow_back),
+            label: Text(l10n.previousExercise),
+          ),
+        ],
         const SizedBox(height: 8),
       ],
     );

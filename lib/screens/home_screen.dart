@@ -86,8 +86,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _TodayTab extends StatelessWidget {
+class _TodayTab extends StatefulWidget {
   const _TodayTab();
+
+  @override
+  State<_TodayTab> createState() => _TodayTabState();
+}
+
+class _TodayTabState extends State<_TodayTab> {
+  /// Offset from today's plan day; browsing wraps around the split.
+  int _dayOffset = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +103,17 @@ class _TodayTab extends StatelessWidget {
     final store = StoreScope.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final day = store.todayPlanDay;
+    final plan = store.plan!;
+    final dayCount = plan.days.length;
+    final todayDay = store.todayPlanDay;
+    final todayIndex = plan.days.indexWhere((d) => d.key == todayDay.key);
+    final selectedIndex = (todayIndex + _dayOffset) % dayCount;
+    final day =
+        plan.days[selectedIndex < 0 ? selectedIndex + dayCount : selectedIndex];
+    final isToday = _dayOffset % dayCount == 0;
     final sessions = store.sessions;
     final locale = Localizations.localeOf(context).toString();
-    final weeklyTarget = store.plan!.days.length;
+    final weeklyTarget = dayCount;
     // Capped at the target so overachieving weeks read "2 of 2", not "4 of 2".
     final weeklyDone = store.sessionsThisWeek.clamp(0, weeklyTarget);
 
@@ -123,18 +138,35 @@ class _TodayTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.todayWorkoutTitle.toUpperCase(),
+                (isToday ? l10n.todayWorkoutTitle : l10n.upNextTitle)
+                    .toUpperCase(),
                 style: textTheme.labelSmall!.copyWith(
                   letterSpacing: 2.5,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 6),
-              Text(
-                dayLabel(l10n, day.key),
-                style: textTheme.displaySmall!.copyWith(
-                  color: colorScheme.primary,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      dayLabel(l10n, day.key),
+                      style: textTheme.displaySmall!.copyWith(
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    tooltip: l10n.previousWorkoutTooltip,
+                    onPressed: () => setState(() => _dayOffset--),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    tooltip: l10n.nextWorkoutTooltip,
+                    onPressed: () => setState(() => _dayOffset++),
+                  ),
+                ],
               ),
               const SizedBox(height: 6),
               Text(
