@@ -2,7 +2,7 @@
 
 Last updated: 9 July 2026
 
-Sweatline is a personal training app for iOS and Android. This policy explains
+Sweatline is a personal training app for iPhone and Android. This policy explains
 what the app does with your information. The short version: it does not send
 anything anywhere.
 

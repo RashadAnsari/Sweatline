@@ -1,9 +1,12 @@
 # Sweatline
 
-Personal training app for iOS and Android, built with Flutter. It builds a
-weekly gym plan the way a coach would, guides you through every session, and
-tracks your strength progress. Everything runs offline; no account, no
-backend, no data leaves the device.
+Personal training app for iPhone and Android, built with Flutter. Answer three
+questions and it builds you a weekly gym plan the way a coach would, then walks
+you through every session set by set and tracks how strong you are getting.
+
+Everything runs offline. There is no account, no backend, and no analytics. The
+release build ships without the `INTERNET` permission, so the app cannot send
+your data anywhere even if it wanted to.
 
 ## Screenshots
 
@@ -50,7 +53,7 @@ backend, no data leaves the device.
   session, set logging, and a wall-clock rest timer with a haptic buzz.
   The screen stays awake, and an in-progress workout survives an app kill
   (auto-saved draft with resume).
-- **Exercise encyclopedia**: 57 exercises with equipment, animated
+- **Exercise encyclopedia**: 63 exercises with equipment, animated
   movement pictograms (a figure tweening between start and end position,
   drawn in code from pose data in `lib/exercise_poses.dart`), muscle maps
   (front/back diagrams with primary and secondary muscles highlighted),
@@ -76,21 +79,37 @@ flutter analyze
 flutter test --exclude-tags golden
 ```
 
-### App icon
+### App icon and splash screen
 
-`assets/icon/app_icon.png` is rendered by a golden test, then fanned out to
-all platform sizes:
+Both images are rendered by golden tests, then fanned out to the native
+platform sizes:
 
 ```sh
 flutter test --update-goldens --tags golden test/tools/app_icon_test.dart
 dart run flutter_launcher_icons
+
+flutter test --update-goldens --tags golden test/tools/splash_logo_test.dart
+dart run flutter_native_splash:create
 ```
 
-### Release signing
+### Releasing
 
-Android release builds require a local `android/key.properties` file. Copy
+Bump `version:` in `pubspec.yaml` first. The build number after the `+` has to
+increase on every upload, or the stores reject the artifact.
+
+```sh
+make android-bundle   # build/app/outputs/bundle/release/app-release.aab
+make ios-bundle       # build/ios/ipa/
+```
+
+Android release builds need a local `android/key.properties`. Copy
 `android/key.properties.example`, fill in the keystore values, and keep the
-real file out of git.
+real file out of git. A Gradle task refuses to build a release without it,
+rather than quietly producing a debug-signed artifact.
+
+iOS targets iPhone only and is locked to portrait.
+`ios/Runner/PrivacyInfo.xcprivacy` declares no tracking and no data
+collection, which is what the App Store privacy label reports.
 
 ## Architecture
 
@@ -113,5 +132,20 @@ boundary.
 
 ## Privacy
 
-All data stays on the device in app-local storage. The app makes no network
-requests.
+All data stays on the device, in a SQLite database inside app-local storage.
+The app has no account system, no analytics, no crash reporting, and no server.
+`INTERNET` is declared only in the debug manifest, so a release build cannot
+make a network request at all. Full text: [docs/privacy-policy.md](docs/privacy-policy.md).
+
+Keeping that true is a hard constraint. Adding a dependency that talks to the
+network invalidates the privacy policy and the "no data collected" answers
+filed with both stores.
+
+## Disclaimer
+
+Sweatline is not medical advice. Ask a doctor before you start a new training
+plan, and stop right away if you feel pain.
+
+## License
+
+[MIT](LICENSE).
