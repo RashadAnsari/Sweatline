@@ -128,6 +128,39 @@ void main() {
     expect((await AppStore.open(db)).draft, isNull);
   });
 
+  test('replacing the plan clears an in-progress draft', () async {
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.buildMuscle,
+        level: Level.beginner,
+        daysPerWeek: 3,
+      ),
+    );
+    await store.saveDraft(
+      WorkoutDraft(
+        dayKey: 'push',
+        startedAt: DateTime(2026, 7, 8, 18),
+        exerciseIndex: 1,
+        sets: const {
+          'benchPress': [SetLog(weightKg: 40, reps: 8)],
+        },
+      ),
+    );
+
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.loseWeight,
+        level: Level.beginner,
+        daysPerWeek: 4,
+      ),
+    );
+
+    expect(store.draft, isNull);
+    expect((await AppStore.open(db)).draft, isNull);
+  });
+
   test('settings persist across store instances', () async {
     final db = await openTestDatabase();
     final store = await AppStore.open(db);

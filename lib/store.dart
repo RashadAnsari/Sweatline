@@ -101,6 +101,13 @@ class AppStore extends ChangeNotifier {
   Future<void> setPlan(Plan plan) async {
     _plan = plan;
     await _db.setMeta(_planKey, jsonEncode(plan.toJson()));
+    // A new plan invalidates any in-progress draft: its saved sets are keyed
+    // to the old plan's exercises, so restoring it would map onto the wrong
+    // day or orphan the draft when no day shares its key.
+    if (_draft != null) {
+      _draft = null;
+      await _db.deleteMeta(_draftKey);
+    }
     notifyListeners();
   }
 
