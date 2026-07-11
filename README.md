@@ -53,6 +53,10 @@ your data anywhere even if it wanted to.
   session, set logging, and a wall-clock rest timer with a haptic buzz.
   The screen stays awake, and an in-progress workout survives an app kill
   (auto-saved draft with resume).
+- **Swap exercises**: replace any move with a similar one that trains the
+  same muscles and fills the same role (a compound for a compound, an
+  isolation for an isolation). Swap just for today mid-workout, or save the
+  change to your plan.
 - **Exercise encyclopedia**: 63 exercises with equipment, animated
   movement pictograms (a figure tweening between start and end position,
   drawn in code from pose data in `lib/exercise_poses.dart`), muscle maps

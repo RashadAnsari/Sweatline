@@ -1132,6 +1132,38 @@ final Map<String, Exercise> _byId = {for (final e in exerciseLibrary) e.id: e};
 
 Exercise exerciseById(String id) => _byId[id]!;
 
+/// Exercises that can stand in for [id]: they train the same muscles and fill
+/// the same programming role. A candidate must share at least one primary
+/// muscle and match the compound-or-isolation status, so a main compound only
+/// offers other compounds and an isolation only offers isolations. Ranked by
+/// primary-muscle overlap, then secondary-muscle overlap, then name. Excludes
+/// [id] itself and returns an empty list when nothing qualifies.
+List<Exercise> similarExercises(String id) {
+  final source = exerciseById(id);
+  final primary = source.primaryMuscles.toSet();
+  final secondary = source.secondaryMuscles.toSet();
+  int primaryOverlap(Exercise e) =>
+      e.primaryMuscles.where(primary.contains).length;
+  int secondaryOverlap(Exercise e) =>
+      e.secondaryMuscles.where(secondary.contains).length;
+  final candidates = exerciseLibrary
+      .where(
+        (e) =>
+            e.id != id &&
+            e.isCompound == source.isCompound &&
+            primaryOverlap(e) > 0,
+      )
+      .toList();
+  candidates.sort((a, b) {
+    final byPrimary = primaryOverlap(b).compareTo(primaryOverlap(a));
+    if (byPrimary != 0) return byPrimary;
+    final bySecondary = secondaryOverlap(b).compareTo(secondaryOverlap(a));
+    if (bySecondary != 0) return bySecondary;
+    return a.name.compareTo(b.name);
+  });
+  return candidates;
+}
+
 /// Stable filter-group keys in display order.
 const List<String> exerciseGroups = [
   'chest',

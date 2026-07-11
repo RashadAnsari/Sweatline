@@ -161,6 +161,76 @@ void main() {
     expect((await AppStore.open(db)).draft, isNull);
   });
 
+  test(
+    'replacePlanExercise swaps the movement but keeps the prescription',
+    () async {
+      final db = await openTestDatabase();
+      final store = await AppStore.open(db);
+      await store.setPlan(
+        generatePlan(
+          goal: Goal.buildMuscle,
+          level: Level.beginner,
+          daysPerWeek: 3,
+        ),
+      );
+      final pushIndex = store.plan!.days.indexWhere((d) => d.key == 'push');
+      final original = store.plan!.days[pushIndex].exercises.first;
+
+      await store.replacePlanExercise('push', 0, 'dbBenchPress');
+
+      final swapped = store.plan!.days[pushIndex].exercises.first;
+      expect(swapped.exerciseId, 'dbBenchPress');
+      expect(swapped.sets, original.sets);
+      expect(swapped.repsMin, original.repsMin);
+      expect(swapped.repsMax, original.repsMax);
+      expect(swapped.restSeconds, original.restSeconds);
+      expect(swapped.warmupSets, original.warmupSets);
+
+      // The change is persisted, not just in memory.
+      final reloaded = await AppStore.open(db);
+      expect(
+        reloaded.plan!.days[pushIndex].exercises.first.exerciseId,
+        'dbBenchPress',
+      );
+    },
+  );
+
+  test(
+    'replacePlanExercise keeps the draft but drops the swapped-out sets',
+    () async {
+      final db = await openTestDatabase();
+      final store = await AppStore.open(db);
+      await store.setPlan(
+        generatePlan(
+          goal: Goal.buildMuscle,
+          level: Level.beginner,
+          daysPerWeek: 3,
+        ),
+      );
+      final oldId = store.plan!.days
+          .firstWhere((d) => d.key == 'push')
+          .exercises
+          .first
+          .exerciseId;
+      await store.saveDraft(
+        WorkoutDraft(
+          dayKey: 'push',
+          startedAt: DateTime(2026, 7, 8, 18),
+          exerciseIndex: 0,
+          sets: {
+            oldId: const [SetLog(weightKg: 40, reps: 8)],
+          },
+        ),
+      );
+
+      await store.replacePlanExercise('push', 0, 'dbBenchPress');
+
+      // The draft survives (unlike setPlan) but the old exercise's sets are gone.
+      expect(store.draft, isNotNull);
+      expect(store.draft!.sets.containsKey(oldId), isFalse);
+    },
+  );
+
   test('settings persist across store instances', () async {
     final db = await openTestDatabase();
     final store = await AppStore.open(db);

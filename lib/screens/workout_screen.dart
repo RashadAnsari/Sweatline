@@ -12,6 +12,7 @@ import '../main.dart';
 import '../models.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/exercise_figure.dart';
+import '../widgets/exercise_picker.dart';
 import '../widgets/page_body.dart';
 import 'exercise_detail_screen.dart';
 import 'workout_summary_screen.dart';
@@ -42,6 +43,13 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     (_) => [],
   );
 
+  /// The day's exercises, held mutably so a lifter can swap one for a similar
+  /// movement mid-session. Swaps replace an entry in place, so the length never
+  /// changes and stays aligned with [_loggedSets] and [_formKeys].
+  late final List<PlannedExercise> _exercises = List.of(
+    widget.planDay.exercises,
+  );
+
   /// -1 is the warm-up page; 0..n-1 are the exercises.
   int _exerciseIndex = -1;
   DateTime _startedAt = DateTime.now();
@@ -59,10 +67,9 @@ class _WorkoutScreenState extends State<WorkoutScreen>
   final _weightController = TextEditingController();
   final _repsController = TextEditingController();
 
-  PlannedExercise get _planned => widget.planDay.exercises[_exerciseIndex];
+  PlannedExercise get _planned => _exercises[_exerciseIndex];
   List<SetLog> get _currentSets => _loggedSets[_exerciseIndex];
-  bool get _isLastExercise =>
-      _exerciseIndex == widget.planDay.exercises.length - 1;
+  bool get _isLastExercise => _exerciseIndex == _exercises.length - 1;
   bool get _hasAnyLoggedSet => _loggedSets.any((sets) => sets.isNotEmpty);
 
   int get _restSecondsLeft => _restEndsAt == null
@@ -119,19 +126,19 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     final draft = StoreScope.of(context).draft;
     if (draft == null || draft.dayKey != widget.planDay.key) return;
     _startedAt = draft.startedAt;
-    for (var i = 0; i < widget.planDay.exercises.length; i++) {
-      final saved = draft.sets[widget.planDay.exercises[i].exerciseId];
+    for (var i = 0; i < _exercises.length; i++) {
+      final saved = draft.sets[_exercises[i].exerciseId];
       if (saved != null) _loggedSets[i] = List.of(saved);
     }
     // Prefer the exact saved position; older drafts lack it, so fall back to
     // the first exercise that still has sets to do.
-    final lastExercise = widget.planDay.exercises.length - 1;
+    final lastExercise = _exercises.length - 1;
     if (draft.exerciseIndex != null) {
       _exerciseIndex = draft.exerciseIndex!.clamp(0, lastExercise);
     } else {
       _exerciseIndex = lastExercise;
-      for (var i = 0; i < widget.planDay.exercises.length; i++) {
-        if (_loggedSets[i].length < widget.planDay.exercises[i].sets) {
+      for (var i = 0; i < _exercises.length; i++) {
+        if (_loggedSets[i].length < _exercises[i].sets) {
           _exerciseIndex = i;
           break;
         }
@@ -152,7 +159,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
         sets: {
           for (var i = 0; i < _loggedSets.length; i++)
             if (_loggedSets[i].isNotEmpty)
-              widget.planDay.exercises[i].exerciseId: _loggedSets[i],
+              _exercises[i].exerciseId: _loggedSets[i],
         },
       ),
     );
@@ -255,6 +262,55 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     _saveDraft();
   }
 
+  /// Swaps the current exercise for a similar one. The swap applies to this
+  /// session (its logged sets are cleared, since they belong to a different
+  /// movement) and, if the lifter opts in, is also written back to the plan.
+  Future<void> _replaceCurrentExercise() async {
+    final l10n = AppLocalizations.of(context)!;
+    final store = StoreScope.of(context);
+    final index = _exerciseIndex;
+    final pick = await showExercisePicker(
+      context,
+      currentExerciseId: _exercises[index].exerciseId,
+      offerPlanUpdate: true,
+    );
+    if (!mounted || pick == null) return;
+    if (_loggedSets[index].isNotEmpty) {
+      final confirmed = await showConfirmDialog(
+        context,
+        title: l10n.replaceExerciseClearTitle,
+        body: l10n.replaceExerciseClearBody,
+        primaryLabel: l10n.replace,
+        secondaryLabel: l10n.cancel,
+      );
+      if (!mounted || !confirmed) return;
+    }
+    final old = _exercises[index];
+    setState(() {
+      _exercises[index] = PlannedExercise(
+        exerciseId: pick.exerciseId,
+        sets: old.sets,
+        repsMin: old.repsMin,
+        repsMax: old.repsMax,
+        restSeconds: old.restSeconds,
+        warmupSets: old.warmupSets,
+      );
+      _loggedSets[index] = [];
+      _stopRest();
+      _weightController.clear();
+      _repsController.clear();
+      _prefillInputs();
+    });
+    await _saveDraft();
+    if (pick.alsoUpdatePlan) {
+      await store.replacePlanExercise(
+        widget.planDay.key,
+        index,
+        pick.exerciseId,
+      );
+    }
+  }
+
   Future<void> _finishWorkout() async {
     final store = StoreScope.of(context);
     final navigator = Navigator.of(context);
@@ -265,7 +321,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
         for (var i = 0; i < _loggedSets.length; i++)
           if (_loggedSets[i].isNotEmpty)
             ExerciseLog(
-              exerciseId: widget.planDay.exercises[i].exerciseId,
+              exerciseId: _exercises[i].exerciseId,
               sets: _loggedSets[i],
             ),
       ],
@@ -462,17 +518,26 @@ class _WorkoutScreenState extends State<WorkoutScreen>
       padding: const EdgeInsets.all(16),
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Text(
                 exercise.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: textTheme.headlineMedium!.copyWith(
                   color: colorScheme.primary,
                 ),
               ),
             ),
             IconButton(
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.swap_horiz),
+              tooltip: l10n.swapTooltip,
+              onPressed: _replaceCurrentExercise,
+            ),
+            IconButton(
+              visualDensity: VisualDensity.compact,
               icon: const Icon(Icons.info_outline),
               tooltip: l10n.exerciseInfoTooltip,
               onPressed: () => Navigator.of(context).push(

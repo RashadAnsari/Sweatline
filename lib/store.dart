@@ -111,6 +111,55 @@ class AppStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Replaces the exercise at [index] of the [dayKey] day with [newExerciseId],
+  /// keeping the slot's sets, reps, rest, and warm-up: only the movement
+  /// changes. Persists the plan and, unlike [setPlan], keeps any in-progress
+  /// draft, pruning only the swapped-out exercise from it so its saved sets do
+  /// not resurface under a movement the plan no longer contains. A no-op when
+  /// there is no plan, the day is unknown, or the index is out of range.
+  Future<void> replacePlanExercise(
+    String dayKey,
+    int index,
+    String newExerciseId,
+  ) async {
+    final plan = _plan;
+    if (plan == null) return;
+    final dayIndex = plan.days.indexWhere((d) => d.key == dayKey);
+    if (dayIndex < 0) return;
+    final day = plan.days[dayIndex];
+    if (index < 0 || index >= day.exercises.length) return;
+    final old = day.exercises[index];
+    final exercises = List<PlannedExercise>.of(day.exercises)
+      ..[index] = PlannedExercise(
+        exerciseId: newExerciseId,
+        sets: old.sets,
+        repsMin: old.repsMin,
+        repsMax: old.repsMax,
+        restSeconds: old.restSeconds,
+        warmupSets: old.warmupSets,
+      );
+    final days = List<PlanDay>.of(plan.days)
+      ..[dayIndex] = PlanDay(key: day.key, exercises: exercises);
+    _plan = Plan(goal: plan.goal, level: plan.level, days: days);
+    await _db.setMeta(_planKey, jsonEncode(_plan!.toJson()));
+
+    final draft = _draft;
+    if (draft != null &&
+        draft.dayKey == dayKey &&
+        draft.sets.containsKey(old.exerciseId)) {
+      final sets = Map<String, List<SetLog>>.of(draft.sets)
+        ..remove(old.exerciseId);
+      _draft = WorkoutDraft(
+        dayKey: draft.dayKey,
+        startedAt: draft.startedAt,
+        exerciseIndex: draft.exerciseIndex,
+        sets: sets,
+      );
+      await _db.setMeta(_draftKey, jsonEncode(_draft!.toJson()));
+    }
+    notifyListeners();
+  }
+
   Future<void> addSession(WorkoutSession session) async {
     _sessions.insert(0, session);
     await _db.insertSession(session);

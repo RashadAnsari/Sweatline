@@ -10,6 +10,7 @@ import '../models.dart';
 import '../plan_generator.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/exercise_figure.dart';
+import '../widgets/exercise_picker.dart';
 import '../widgets/page_body.dart';
 import 'exercise_detail_screen.dart';
 import 'library_tab.dart';
@@ -269,9 +270,13 @@ class _TodayTabState extends State<_TodayTab> {
 }
 
 class _PlannedExerciseTile extends StatelessWidget {
-  const _PlannedExerciseTile({required this.planned});
+  const _PlannedExerciseTile({required this.planned, this.onReplace});
 
   final PlannedExercise planned;
+
+  /// When set, a swap button is shown that replaces this exercise. Omitted on
+  /// the read-only Today preview.
+  final VoidCallback? onReplace;
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +302,19 @@ class _PlannedExerciseTile extends StatelessWidget {
         '${l10n.setsByReps(planned.sets, planned.repsMin, planned.repsMax)} · '
         '${l10n.restInfo(planned.restSeconds)}',
       ),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: onReplace == null
+          ? const Icon(Icons.chevron_right)
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.swap_horiz),
+                  tooltip: l10n.swapTooltip,
+                  onPressed: onReplace,
+                ),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => ExerciseDetailScreen(exercise: exercise),
@@ -325,6 +342,21 @@ class _PlanTab extends StatelessWidget {
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
       );
     }
+  }
+
+  Future<void> _replacePlanExercise(
+    BuildContext context,
+    String dayKey,
+    int index,
+    String currentExerciseId,
+  ) async {
+    final store = StoreScope.of(context);
+    final pick = await showExercisePicker(
+      context,
+      currentExerciseId: currentExerciseId,
+    );
+    if (pick == null) return;
+    await store.replacePlanExercise(dayKey, index, pick.exerciseId);
   }
 
   @override
@@ -373,8 +405,16 @@ class _PlanTab extends StatelessWidget {
                       ),
                     ],
                   ),
-                  for (final planned in day.exercises)
-                    _PlannedExerciseTile(planned: planned),
+                  for (var i = 0; i < day.exercises.length; i++)
+                    _PlannedExerciseTile(
+                      planned: day.exercises[i],
+                      onReplace: () => _replacePlanExercise(
+                        context,
+                        day.key,
+                        i,
+                        day.exercises[i].exerciseId,
+                      ),
+                    ),
                 ],
               ),
             ),

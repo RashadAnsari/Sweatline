@@ -289,5 +289,16 @@
   "privacyNote": "All your data stays on this device. Nothing is ever sent online.",
   "healthDisclaimer": "Sweatline is not medical advice. Ask a doctor before you start a new training plan. Stop right away if you feel pain.",
   "exerciseInfoTooltip": "Exercise details",
-  "settingsTooltip": "Settings"
+  "settingsTooltip": "Settings",
+  "swapTooltip": "Replace exercise",
+  "replaceExerciseTitle": "Replace {name}",
+  "@replaceExerciseTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "replaceExerciseClearTitle": "Replace this exercise?",
+  "replaceExerciseClearBody": "The sets you saved for this exercise will be removed.",
+  "alsoUpdatePlan": "Also change this in my plan",
+  "noSimilarExercises": "No similar exercises to switch to."
 }
