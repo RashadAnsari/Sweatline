@@ -10,6 +10,7 @@ import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
 import '../models.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/exercise_figure.dart';
 import '../widgets/page_body.dart';
 import 'exercise_detail_screen.dart';
@@ -291,24 +292,15 @@ class _WorkoutScreenState extends State<WorkoutScreen>
       navigator.pop();
       return;
     }
-    final quit = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.exitWorkoutTitle),
-        content: Text(l10n.exitWorkoutBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.keepGoing),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.quit),
-          ),
-        ],
-      ),
+    final quit = await showConfirmDialog(
+      context,
+      title: l10n.exitWorkoutTitle,
+      body: l10n.exitWorkoutBody,
+      primaryLabel: l10n.quit,
+      secondaryLabel: l10n.keepGoing,
+      destructive: true,
     );
-    if (quit == true) {
+    if (quit) {
       await store.clearDraft();
       navigator.pop();
     }

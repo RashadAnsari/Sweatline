@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
 import '../models.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/page_body.dart';
 
 /// Units, appearance, backup/restore, and about.
@@ -25,24 +26,14 @@ class SettingsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final store = StoreScope.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.importConfirmTitle),
-        content: Text(l10n.importConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.restore),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.importConfirmTitle,
+      body: l10n.importConfirmBody,
+      primaryLabel: l10n.restore,
+      secondaryLabel: l10n.cancel,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
     try {
       await store.importData(clipboard?.text ?? '');

@@ -8,6 +8,7 @@ import '../labels.dart';
 import '../main.dart';
 import '../models.dart';
 import '../plan_generator.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/exercise_figure.dart';
 import '../widgets/page_body.dart';
 import 'exercise_detail_screen.dart';
@@ -312,24 +313,14 @@ class _PlanTab extends StatelessWidget {
   Future<void> _confirmNewPlan(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     final navigator = Navigator.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.newPlanConfirmTitle),
-        content: Text(l10n.newPlanConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.replace),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.newPlanConfirmTitle,
+      body: l10n.newPlanConfirmBody,
+      primaryLabel: l10n.replace,
+      secondaryLabel: l10n.cancel,
     );
-    if (confirmed == true) {
+    if (confirmed) {
       navigator.push(
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
       );

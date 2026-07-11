@@ -48,9 +48,5 @@ app.*.map.json
 # Local agent settings
 .claude/settings.local.json
 
-# Local release notes: keystore/checklist steps and store listing copy
-docs/release.md
-docs/store-listing.md
-
 # Generated localizations (flutter gen-l10n)
 lib/l10n/app_localizations*.dart

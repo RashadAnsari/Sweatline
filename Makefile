@@ -10,6 +10,10 @@ lint:
 	flutter analyze
 	dart format --set-exit-if-changed lib/
 
+# Run the app on a connected device or simulator
+run:
+	flutter run
+
 # ── Android ───────────────────────────────────────────────────────────────────
 
 # Build a release APK signed with the release keystore (output: build/app/outputs/apk/release/app-release.apk)
