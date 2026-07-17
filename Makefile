@@ -14,6 +14,10 @@ lint:
 run:
 	flutter run
 
+# Resize docs/*.png in place to the App Store screenshot size (1284x2778)
+screenshots:
+	python3 tools/app_store_screenshots.py
+
 # ── Android ───────────────────────────────────────────────────────────────────
 
 # Build a release APK signed with the release keystore (output: build/app/outputs/apk/release/app-release.apk)
