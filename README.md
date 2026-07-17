@@ -1,4 +1,15 @@
-# Sweatline
+<p align="center">
+  <img src="assets/icon/app_icon.png" alt="Sweatline app icon" width="128">
+</p>
+
+<h1 align="center">Sweatline</h1>
+
+<p align="center"><strong>Your personal gym coach, fully offline.</strong></p>
+
+<p align="center">
+  <a href="https://github.com/RashadAnsari/Sweatline/actions/workflows/build.yml"><img src="https://github.com/RashadAnsari/Sweatline/actions/workflows/build.yml/badge.svg" alt="CI status"></a>
+  <a href="https://github.com/RashadAnsari/Sweatline/releases/latest"><img src="https://img.shields.io/github/v/release/RashadAnsari/Sweatline" alt="Latest release"></a>
+</p>
 
 Personal training app for iPhone and Android, built with Flutter. Answer three
 questions and it builds you a weekly gym plan the way a coach would, then walks
@@ -7,6 +18,18 @@ you through every session set by set and tracks how strong you are getting.
 Everything runs offline. There is no account, no backend, and no analytics. The
 release build ships without the `INTERNET` permission, so the app cannot send
 your data anywhere even if it wanted to.
+
+Sweatline is free and open source under the MIT license: no ads, no
+subscriptions, and nothing locked behind a paywall.
+
+## Download
+
+<a href="https://apps.apple.com/nl/app/sweatline/id6789278612?l=en-GB">
+  <img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" height="54">
+</a>
+
+On Android, download the APK from the
+[latest release](https://github.com/RashadAnsari/Sweatline/releases/latest).
 
 ## Screenshots
 
@@ -139,7 +162,9 @@ boundary.
 All data stays on the device, in a SQLite database inside app-local storage.
 The app has no account system, no analytics, no crash reporting, and no server.
 `INTERNET` is declared only in the debug manifest, so a release build cannot
-make a network request at all. Full text: [docs/privacy-policy.md](docs/privacy-policy.md).
+make a network request at all. Full text:
+[rashadansari.github.io/Sweatline/privacy-policy](https://rashadansari.github.io/Sweatline/privacy-policy)
+(source: [docs/privacy-policy.md](docs/privacy-policy.md)).
 
 Keeping that true is a hard constraint. Adding a dependency that talks to the
 network invalidates the privacy policy and the "no data collected" answers
@@ -149,6 +174,11 @@ filed with both stores.
 
 Sweatline is not medical advice. Ask a doctor before you start a new training
 plan, and stop right away if you feel pain.
+
+## Feedback
+
+Found a bug, or want an exercise added? Open an
+[issue](https://github.com/RashadAnsari/Sweatline/issues).
 
 ## License
 
