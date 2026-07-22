@@ -70,16 +70,19 @@ On Android, download the APK from the
   generates a plan from proven splits: full body, push/pull/legs,
   upper/lower, or PPL twice for 6 days a week.
 - **Real programming**: compound lifts first with warm-up sets, heavier
-  loads, and longer rests; isolation work with higher reps; rep ranges and
-  rest periods tuned per goal; double-progression weight suggestions.
+  loads, and longer rests; isolation work with higher reps; holds like the
+  plank prescribed in seconds; rep ranges and rest periods tuned per goal;
+  cardio prescribed for the goals that need it. Double progression asks for
+  one more rep, then more weight, and backs the weight off when a lift stalls
+  three sessions in a row.
 - **Guided workouts**: one exercise at a time, target weight from your last
   session, set logging, and a wall-clock rest timer with a haptic buzz.
   Barbell lifts show which plates to put on each side of the bar. The
   screen stays awake, and an in-progress workout survives an app kill
   (auto-saved draft with resume).
-- **Personal records**: beat your old best weight and the set gets a trophy,
-  live during the workout and again on the summary. Every exercise shows
-  its all-time best.
+- **Personal records**: beat your best weight, or match it for an extra rep,
+  and the set gets a trophy, live during the workout and again on the
+  summary. Every exercise shows its all-time best.
 - **Make the plan yours**: swap any move for a similar one (just for today
   mid-workout, or saved to the plan), reorder a day's exercises by
   dragging, and edit sets, rep range, and rest per exercise. Keep a

@@ -66,6 +66,44 @@ String levelLabel(AppLocalizations l10n, Level level) => switch (level) {
   Level.advanced => l10n.levelAdvanced,
 };
 
+/// The "3 sets x 8 to 10 reps" line under an exercise. A held exercise is
+/// prescribed and logged in seconds, so it reads in seconds everywhere.
+String setsAndRepsLabel(
+  AppLocalizations l10n,
+  int sets,
+  int repsMin,
+  int repsMax, {
+  required bool timed,
+}) => timed
+    ? l10n.setsBySeconds(sets, repsMin, repsMax)
+    : l10n.setsByReps(sets, repsMin, repsMax);
+
+/// One logged set as "60 kg x 8", or just the seconds for a held exercise,
+/// which carries no weight.
+String setResultLabel(
+  AppLocalizations l10n,
+  WeightUnit unit,
+  SetLog set, {
+  required bool timed,
+}) => timed
+    ? l10n.setResultTimed(set.reps)
+    : l10n.setResult(
+        formatKgIn(unit, set.weightKg),
+        unitLabel(l10n, unit),
+        set.reps,
+      );
+
+/// A progress value the way the lifter reads it: a weight in their own unit,
+/// or seconds for a held exercise, which carries no weight.
+String progressValueLabel(
+  AppLocalizations l10n,
+  WeightUnit unit,
+  double value, {
+  required bool timed,
+}) => timed
+    ? l10n.setResultTimed(value.round())
+    : l10n.weightWithUnit(formatKgIn(unit, value), unitLabel(l10n, unit));
+
 /// Parses user weight input, accepting a comma as the decimal separator.
 double? parseWeightInput(String? value) =>
     double.tryParse((value ?? '').trim().replaceAll(',', '.'));

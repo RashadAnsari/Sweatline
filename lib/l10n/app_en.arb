@@ -9,7 +9,7 @@
   "goalLoseWeight": "Lose weight",
   "goalGetFit": "Get fit",
   "goalBuildMuscleDesc": "Heavier weights, 6 to 12 reps, long rests",
-  "goalLoseWeightDesc": "More reps, short rests, extra cardio",
+  "goalLoseWeightDesc": "Keep your muscle while you lose fat, plus cardio",
   "goalGetFitDesc": "A mix of strength and cardio",
   "levelQuestion": "How much training have you done?",
   "levelBeginner": "Beginner",
@@ -26,6 +26,7 @@
     }
   },
   "daysQuestion": "How many days a week can you train?",
+  "beginnerFrequencyNote": "Starting out, 3 or 4 days works best. More days do not build muscle faster, and they are harder to keep up.",
   "daysOption": "{count} days",
   "@daysOption": {
     "placeholders": {
@@ -114,6 +115,14 @@
   },
   "noWorkoutsYet": "No workouts yet. Start when you are ready.",
 
+  "setsBySeconds": "{sets} sets x {repsMin} to {repsMax} seconds",
+  "@setsBySeconds": {
+    "placeholders": {
+      "sets": { "type": "int" },
+      "repsMin": { "type": "int" },
+      "repsMax": { "type": "int" }
+    }
+  },
   "setsByReps": "{sets} sets x {repsMin} to {repsMax} reps",
   "@setsByReps": {
     "placeholders": {
@@ -144,7 +153,9 @@
   "nextWorkoutTooltip": "Next workout",
   "upNextTitle": "In your plan",
   "effortNote": "Work hard, but do not train to failure. Stop each set when you could still do 1 or 2 more good reps.",
-  "cardioFinisher": "To burn more fat, finish with 15 to 20 minutes of light cardio.",
+  "cardioFinisher": "Finish with 20 to 30 minutes of easy cardio. On your rest days, add a brisk 30 minute walk.",
+  "cardioFinisherFit": "Finish with 15 to 20 minutes of cardio: a bike, a rowing machine, or a fast walk.",
+  "planCardioNote": "Then cardio after you lift",
   "newPlanButton": "New plan",
   "newPlanConfirmTitle": "Replace your plan?",
   "newPlanConfirmBody": "We keep your workout history. Only the plan changes.",
@@ -175,7 +186,7 @@
     }
   },
   "trainerTipFirstTime": "This is your first time. Start light and focus on good form.",
-  "trainerTipRepeat": "Last time you lifted {weight} {unit}. Try to match it.",
+  "trainerTipRepeat": "Last time you lifted {weight} {unit}. Try one more rep this time.",
   "@trainerTipRepeat": {
     "placeholders": {
       "weight": { "type": "String" },
@@ -184,6 +195,26 @@
   },
   "trainerTipIncrease": "You did every rep last time. Go up to {weight} {unit}.",
   "@trainerTipIncrease": {
+    "placeholders": {
+      "weight": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+  "trainerTipBodyweight": "Last time you did {reps} reps with your own body weight. Try one more.",
+  "@trainerTipBodyweight": {
+    "placeholders": {
+      "reps": { "type": "int" }
+    }
+  },
+  "trainerTipTimedFirst": "This is your first time. Hold with good form and stop when your hips drop.",
+  "trainerTipTimedRepeat": "Last time you held {seconds} seconds. Try a few seconds more.",
+  "@trainerTipTimedRepeat": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "trainerTipDeload": "This weight has not moved for three workouts. Go lighter today, at {weight} {unit}, and build back up.",
+  "@trainerTipDeload": {
     "placeholders": {
       "weight": { "type": "String" },
       "unit": { "type": "String" }
@@ -202,6 +233,8 @@
     }
   },
   "repsFieldLabel": "Reps *",
+  "secondsFieldLabel": "Seconds *",
+  "secondsValidation": "Enter how many seconds you held. Use a whole number above 0.",
   "weightValidation": "Enter the weight in {unit}, for example 20 or 22.5",
   "@weightValidation": {
     "placeholders": {
@@ -250,6 +283,12 @@
   },
   "newRecord": "New record",
   "allTimeBest": "All-time best",
+  "setResultTimed": "{seconds} s",
+  "@setResultTimed": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
   "setResult": "{weight} {unit} x {reps}",
   "@setResult": {
     "placeholders": {
@@ -291,6 +330,7 @@
   },
 
   "unitKg": "kg",
+  "unitSeconds": "s",
   "unitLb": "lb",
   "resumeWorkout": "Continue workout",
   "settingsTitle": "Settings",

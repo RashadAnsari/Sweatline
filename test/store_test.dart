@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sweatline/labels.dart';
 import 'package:sweatline/models.dart';
 import 'package:sweatline/plan_generator.dart';
 import 'package:sweatline/store.dart';
@@ -95,6 +96,174 @@ void main() {
     },
   );
 
+  test('a stalled lift is deloaded instead of ground out forever', () async {
+    final store = await openTestStore();
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.buildMuscle,
+        level: Level.beginner,
+        daysPerWeek: 3,
+      ),
+    );
+    final planned = store.plan!.days.first.exercises.firstWhere(
+      (e) => e.exerciseId == 'benchPress',
+    );
+
+    // Same weight, never completing the 4x8 target.
+    for (var i = 0; i < 2; i++) {
+      await store.addSession(
+        sessionFor('push', const [
+          SetLog(weightKg: 60, reps: 8),
+          SetLog(weightKg: 60, reps: 7),
+          SetLog(weightKg: 60, reps: 6),
+          SetLog(weightKg: 60, reps: 5),
+        ]),
+      );
+      expect(store.isStalled(planned), isFalse, reason: 'only ${i + 1} tries');
+      expect(store.suggestedWeight(planned), 60);
+    }
+
+    // The third failed session at the same weight is a stall: back off to
+    // about 90%, rounded to a weight the gym can load.
+    await store.addSession(
+      sessionFor('push', const [
+        SetLog(weightKg: 60, reps: 8),
+        SetLog(weightKg: 60, reps: 7),
+        SetLog(weightKg: 60, reps: 6),
+        SetLog(weightKg: 60, reps: 5),
+      ]),
+    );
+    expect(store.isStalled(planned), isTrue);
+    expect(store.suggestedWeight(planned), 52.5);
+  });
+
+  test('suggestedReps asks for one more rep than last time', () async {
+    final store = await openTestStore();
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.buildMuscle,
+        level: Level.beginner,
+        daysPerWeek: 3,
+      ),
+    );
+    final planned = store.plan!.days.first.exercises.firstWhere(
+      (e) => e.exerciseId == 'benchPress',
+    );
+
+    // Nothing logged yet: start at the bottom of the range.
+    expect(store.suggestedReps(planned, 0), planned.repsMin);
+
+    await store.addSession(
+      sessionFor('push', const [
+        SetLog(weightKg: 40, reps: 6),
+        SetLog(weightKg: 40, reps: 8),
+      ]),
+    );
+    // One more rep than last time, never past the top of the range.
+    expect(store.suggestedReps(planned, 0), 7);
+    expect(store.suggestedReps(planned, 1), planned.repsMax);
+    // Sets beyond last session's start at the bottom of the range.
+    expect(store.suggestedReps(planned, 2), planned.repsMin);
+  });
+
+  test('a held exercise progresses in seconds and carries no weight', () async {
+    final store = await openTestStore();
+    const plank = PlannedExercise(
+      exerciseId: 'plank',
+      sets: 3,
+      repsMin: 30,
+      repsMax: 45,
+      restSeconds: 60,
+    );
+    await store.addSession(
+      WorkoutSession(
+        date: DateTime.now(),
+        dayKey: 'legs',
+        logs: const [
+          ExerciseLog(
+            exerciseId: 'plank',
+            sets: [SetLog(weightKg: 0, reps: 30)],
+          ),
+        ],
+      ),
+    );
+
+    expect(store.suggestedWeight(plank), isNull);
+    expect(store.isStalled(plank), isFalse);
+    expect(store.suggestedReps(plank, 0), 30 + timedProgressionSeconds);
+    // The trend follows the hold, not the weight, which is always zero.
+    expect(store.progressHistory('plank').single.$2, 30);
+  });
+
+  test('pound users are suggested weights their gym can load', () async {
+    final store = await openTestStore();
+    await store.setUnit(WeightUnit.lb);
+    const planned = PlannedExercise(
+      exerciseId: 'benchPress',
+      sets: 1,
+      repsMin: 6,
+      repsMax: 8,
+      restSeconds: 180,
+    );
+    // 100 lb completed at the top of the range steps to 105 lb, not to the
+    // 102.5 lb that a 2.5 kg jump would land on.
+    await store.addSession(
+      sessionFor('push', [
+        SetLog(weightKg: unitToKg(WeightUnit.lb, 100), reps: 8),
+      ]),
+    );
+    expect(
+      kgToUnit(WeightUnit.lb, store.suggestedWeight(planned)!),
+      closeTo(105, 0.001),
+    );
+  });
+
+  test('more reps at the same weight counts as a record', () async {
+    final store = await openTestStore();
+    // Nothing logged yet, so a first attempt is not a record.
+    expect(
+      store.isRecordSet('benchPress', const SetLog(weightKg: 60, reps: 8)),
+      isFalse,
+    );
+
+    await store.addSession(
+      sessionFor('push', const [SetLog(weightKg: 60, reps: 8)]),
+    );
+
+    expect(
+      store.isRecordSet('benchPress', const SetLog(weightKg: 60, reps: 9)),
+      isTrue,
+      reason: 'same weight for one more rep beats it',
+    );
+    expect(
+      store.isRecordSet('benchPress', const SetLog(weightKg: 62.5, reps: 6)),
+      isTrue,
+      reason: 'heavier is a record even for fewer reps',
+    );
+    expect(
+      store.isRecordSet('benchPress', const SetLog(weightKg: 60, reps: 8)),
+      isFalse,
+      reason: 'matching a set does not beat it',
+    );
+    // A held exercise carries no weight, so the longest hold is the record.
+    await store.addSession(
+      WorkoutSession(
+        date: DateTime.now(),
+        dayKey: 'legs',
+        logs: const [
+          ExerciseLog(
+            exerciseId: 'plank',
+            sets: [SetLog(weightKg: 0, reps: 30)],
+          ),
+        ],
+      ),
+    );
+    expect(
+      store.isRecordSet('plank', const SetLog(weightKg: 0, reps: 35)),
+      isTrue,
+    );
+  });
+
   test('corrupt meta value is dropped instead of crashing', () async {
     final db = await openTestDatabase();
     await db.setMeta('plan', 'this is not json {{{');
@@ -126,6 +295,45 @@ void main() {
 
     await reloaded.clearDraft();
     expect((await AppStore.open(db)).draft, isNull);
+  });
+
+  test('a draft remembers a mid-session swap the plan never saw', () async {
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.buildMuscle,
+        level: Level.beginner,
+        daysPerWeek: 3,
+      ),
+    );
+    // The lifter swapped the bench for dumbbells for this session only.
+    await store.saveDraft(
+      WorkoutDraft(
+        dayKey: 'push',
+        startedAt: DateTime(2026, 7, 22, 18),
+        exerciseIndex: 0,
+        exercises: const [
+          PlannedExercise(
+            exerciseId: 'dbBenchPress',
+            sets: 4,
+            repsMin: 6,
+            repsMax: 8,
+            restSeconds: 180,
+            warmupSets: 2,
+          ),
+        ],
+        sets: const {
+          'dbBenchPress': [SetLog(weightKg: 30, reps: 8)],
+        },
+      ),
+    );
+
+    final reloaded = await AppStore.open(db);
+    expect(reloaded.draft!.exercises!.single.exerciseId, 'dbBenchPress');
+    expect(reloaded.draft!.sets['dbBenchPress']!.single.reps, 8);
+    // The plan itself is untouched by a session-only swap.
+    expect(reloaded.plan!.days.first.exercises.first.exerciseId, 'benchPress');
   });
 
   test('replacing the plan clears an in-progress draft', () async {

@@ -64,8 +64,8 @@ void main() {
       level: Level.beginner,
       daysPerWeek: 3,
     );
-    // Push day: benchPress (main), overheadPress (compound),
-    // inclineDbPress (compound), chestFly (isolation).
+    // Push day: benchPress (main), overheadPress (compound), then the
+    // isolation work.
     final push = plan.days.first.exercises;
     final main = push[0];
     expect(main.exerciseId, 'benchPress');
@@ -140,11 +140,112 @@ void main() {
   });
 
   test('lower-body compounds progress in bigger jumps', () {
-    expect(incrementFor('squat'), 5.0);
-    expect(incrementFor('deadlift'), 5.0);
-    expect(incrementFor('legPress'), 5.0);
-    expect(incrementFor('benchPress'), progressionIncrementKg);
-    expect(incrementFor('bicepCurl'), progressionIncrementKg);
+    expect(progressionStep(WeightUnit.kg, 'squat'), 5.0);
+    expect(progressionStep(WeightUnit.kg, 'deadlift'), 5.0);
+    expect(progressionStep(WeightUnit.kg, 'legPress'), 5.0);
+    expect(
+      progressionStep(WeightUnit.kg, 'benchPress'),
+      progressionIncrementKg,
+    );
+    expect(progressionStep(WeightUnit.kg, 'bicepCurl'), progressionIncrementKg);
+  });
+
+  test('pound users step up in plate sizes their gym stocks', () {
+    // 2.5 kg is 5.5 lb: a jump no gym can load. Pounds step in 5 and 10.
+    expect(progressionStep(WeightUnit.lb, 'benchPress'), 5.0);
+    expect(progressionStep(WeightUnit.lb, 'squat'), 10.0);
+  });
+
+  test('held exercises are prescribed in seconds, not reps', () {
+    // The plank is the last slot of the advanced leg day.
+    final legs = generatePlan(
+      goal: Goal.buildMuscle,
+      level: Level.advanced,
+      daysPerWeek: 3,
+    ).days.firstWhere((d) => d.key == 'legs');
+    final plank = legs.exercises.firstWhere((e) => e.exerciseId == 'plank');
+    expect(exerciseById('plank').isTimed, isTrue);
+    expect(plank.repsMin, 30);
+    expect(plank.repsMax, 45);
+    expect(plank.warmupSets, 0);
+  });
+
+  test('a swapped-in deadlift keeps its recovery cap', () {
+    final push = generatePlan(
+      goal: Goal.buildMuscle,
+      level: Level.beginner,
+      daysPerWeek: 3,
+    ).days.first.exercises.first;
+    expect(push.sets, 4);
+
+    final swapped = prescriptionForSwap(push, 'deadlift');
+    expect(swapped.exerciseId, 'deadlift');
+    expect(swapped.sets, 3);
+    expect(swapped.repsMin, 5);
+    expect(swapped.repsMax, 8);
+
+    // Everything else inherits the slot untouched.
+    final ordinary = prescriptionForSwap(push, 'dbBenchPress');
+    expect(ordinary.sets, push.sets);
+    expect(ordinary.repsMax, push.repsMax);
+    expect(ordinary.restSeconds, push.restSeconds);
+    expect(ordinary.warmupSets, push.warmupSets);
+  });
+
+  test('beginner days cover the whole body, not three presses in a row', () {
+    final plan = generatePlan(
+      goal: Goal.buildMuscle,
+      level: Level.beginner,
+      daysPerWeek: 3,
+    );
+    final push = plan.days.firstWhere((d) => d.key == 'push');
+    expect(
+      push.exercises.map((e) => e.exerciseId),
+      containsAll(['tricepPushdown', 'lateralRaise']),
+    );
+    final legs = plan.days.firstWhere((d) => d.key == 'legs');
+    expect(legs.exercises.map((e) => e.exerciseId), contains('calfRaise'));
+
+    // Compounds still come first in every day, whatever the priority order.
+    for (final day in plan.days) {
+      var seenIsolation = false;
+      for (final planned in day.exercises) {
+        final compound = exerciseById(planned.exerciseId).isCompound;
+        expect(
+          compound && seenIsolation,
+          isFalse,
+          reason: '${day.key} runs ${planned.exerciseId} after an isolation',
+        );
+        seenIsolation |= !compound;
+      }
+    }
+  });
+
+  test('beginners are warned off the highest frequencies', () {
+    expect(isDemandingFrequency(Level.beginner, 3), isFalse);
+    expect(isDemandingFrequency(Level.beginner, 4), isFalse);
+    expect(isDemandingFrequency(Level.beginner, 5), isTrue);
+    expect(isDemandingFrequency(Level.advanced, 6), isFalse);
+  });
+
+  test('session estimate covers the warm-up and skips the trailing rest', () {
+    // One exercise: 2 warm-up sets, then 4 working sets of about 45 s with
+    // 3 rests of 180 s between them, plus the general warm-up.
+    final day = PlanDay(
+      key: 'push',
+      exercises: const [
+        PlannedExercise(
+          exerciseId: 'benchPress',
+          sets: 4,
+          repsMin: 6,
+          repsMax: 8,
+          restSeconds: 180,
+          warmupSets: 2,
+        ),
+      ],
+    );
+    final seconds = generalWarmupMinutes * 60 + 2 * 60 + 4 * 45 + 3 * 180;
+    expect(estimatedSessionMinutes(day), (seconds / 60).round());
   });
 
   test('every planned exercise exists in the library and none is cardio', () {

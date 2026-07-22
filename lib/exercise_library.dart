@@ -579,6 +579,7 @@ const List<Exercise> exerciseLibrary = [
       'Sit on a bench and rest your elbow against your inner thigh.',
       'Curl the dumbbell up to your shoulder.',
       'Lower it slowly to a full stretch.',
+      'Do the reps, then switch arms.',
     ],
     tips: [
       'Watch your bicep work. Focus helps the squeeze.',
@@ -830,6 +831,7 @@ const List<Exercise> exerciseLibrary = [
     tips: [
       'Your front knee should stay over your foot, not go past your toes.',
       'Take slightly longer steps to feel more glutes.',
+      'Count the reps for each leg: 10 reps means 10 steps with each leg.',
     ],
   ),
   Exercise(
@@ -909,12 +911,13 @@ const List<Exercise> exerciseLibrary = [
     name: 'Plank',
     group: 'core',
     equipment: 'bodyweight',
+    isTimed: true,
     primaryMuscles: ['abs'],
     secondaryMuscles: ['obliques', 'shoulders'],
     steps: [
       'Rest on your forearms and toes, with your elbows under your shoulders.',
       'Make a straight line from your head to your heels.',
-      'Hold and breathe steadily. Count the seconds you hold as your reps.',
+      'Hold and breathe steadily for the seconds your plan asks for.',
     ],
     tips: [
       'Squeeze your glutes and abs. Do not let your hips drop or rise.',
@@ -926,12 +929,13 @@ const List<Exercise> exerciseLibrary = [
     name: 'Side Plank',
     group: 'core',
     equipment: 'bodyweight',
+    isTimed: true,
     primaryMuscles: ['obliques'],
     secondaryMuscles: ['abs', 'shoulders'],
     steps: [
       'Lie on your side, resting on one forearm, with your elbow under your shoulder.',
       'Lift your hips so your body makes a straight line.',
-      'Hold, then switch sides. Count the seconds on each side as your reps.',
+      'Hold, then switch sides. The seconds count for each side.',
     ],
     tips: [
       'Push the floor away. Do not rest on your shoulder.',
@@ -1044,6 +1048,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Treadmill Run',
     group: 'cardio',
     equipment: 'machine',
+    isTimed: true,
     primaryMuscles: ['quads', 'hamstrings', 'calves'],
     secondaryMuscles: ['glutes'],
     steps: [
@@ -1061,6 +1066,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Rowing Machine',
     group: 'cardio',
     equipment: 'machine',
+    isTimed: true,
     primaryMuscles: ['upperBack', 'lats', 'quads'],
     secondaryMuscles: ['biceps', 'hamstrings', 'abs'],
     steps: [
@@ -1079,6 +1085,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Stationary Bike',
     group: 'cardio',
     equipment: 'machine',
+    isTimed: true,
     primaryMuscles: ['quads'],
     secondaryMuscles: ['hamstrings', 'calves', 'glutes'],
     steps: [
@@ -1096,6 +1103,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Jump Rope',
     group: 'cardio',
     equipment: 'bodyweight',
+    isTimed: true,
     primaryMuscles: ['calves'],
     secondaryMuscles: ['quads', 'shoulders', 'forearms'],
     steps: [
@@ -1116,6 +1124,7 @@ const List<Exercise> exerciseLibrary = [
     equipment: 'bodyweight',
     primaryMuscles: ['quads', 'chest'],
     secondaryMuscles: ['abs', 'shoulders', 'triceps'],
+    isCompound: true,
     steps: [
       'Squat down and put your hands on the floor.',
       'Kick your feet back into a push-up position and do a push-up.',
@@ -1134,14 +1143,18 @@ Exercise exerciseById(String id) => _byId[id]!;
 
 /// Exercises that can stand in for [id]: they train the same muscles and fill
 /// the same programming role. A candidate must share at least one primary
-/// muscle and match the compound-or-isolation status, so a main compound only
-/// offers other compounds and an isolation only offers isolations. Ranked by
-/// primary-muscle overlap, then secondary-muscle overlap, then name. Excludes
-/// [id] itself and returns an empty list when nothing qualifies.
+/// muscle and fill the same slot, which means matching on three things: the
+/// compound-or-isolation status, so a main compound only offers other
+/// compounds; whether the work is timed, so a plank never inherits a rep
+/// prescription; and whether it is cardio, so a conditioning movement never
+/// stands in for a lift. Ranked by primary-muscle overlap, then
+/// secondary-muscle overlap, then name. Excludes [id] itself and returns an
+/// empty list when nothing qualifies.
 List<Exercise> similarExercises(String id) {
   final source = exerciseById(id);
   final primary = source.primaryMuscles.toSet();
   final secondary = source.secondaryMuscles.toSet();
+  final sourceIsCardio = source.group == 'cardio';
   int primaryOverlap(Exercise e) =>
       e.primaryMuscles.where(primary.contains).length;
   int secondaryOverlap(Exercise e) =>
@@ -1151,6 +1164,8 @@ List<Exercise> similarExercises(String id) {
         (e) =>
             e.id != id &&
             e.isCompound == source.isCompound &&
+            e.isTimed == source.isTimed &&
+            (e.group == 'cardio') == sourceIsCardio &&
             primaryOverlap(e) > 0,
       )
       .toList();

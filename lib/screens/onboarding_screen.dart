@@ -126,6 +126,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
               ],
             ),
+            // Advice, not a block: the choice stays the lifter's.
+            if (isDemandingFrequency(_level, _daysPerWeek)) ...[
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 20,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      l10n.beginnerFrequencyNote,
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 20),
           ],
         ),

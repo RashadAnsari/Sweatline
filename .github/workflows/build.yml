@@ -14,10 +14,15 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # Pinned rather than floating on stable: an unpinned channel silently
+      # moves to whatever stable is newest, so CI reports analyzer warnings
+      # against an SDK no developer has, and nobody can reproduce them
+      # locally. Raise this deliberately, together with the local SDK.
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.41.1
           cache: true
 
       - name: Install dependencies

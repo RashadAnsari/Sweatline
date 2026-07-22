@@ -40,7 +40,7 @@ class ExerciseDetailScreen extends StatelessWidget {
     final store = StoreScope.of(context);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final history = store.weightHistory(exercise.id);
+    final history = store.progressHistory(exercise.id);
     final dateFormat = DateFormat.MMMd(
       Localizations.localeOf(context).toString(),
     );
@@ -231,14 +231,13 @@ class ExerciseDetailScreen extends StatelessWidget {
                   leading: Icon(Icons.emoji_events, color: colorScheme.primary),
                   title: Text(l10n.allTimeBest),
                   trailing: Text(
-                    l10n.weightWithUnit(
-                      formatKgIn(
-                        store.unit,
-                        history
-                            .map((entry) => entry.$2)
-                            .reduce((a, b) => a > b ? a : b),
-                      ),
-                      unitLabel(l10n, store.unit),
+                    progressValueLabel(
+                      l10n,
+                      store.unit,
+                      history
+                          .map((entry) => entry.$2)
+                          .reduce((a, b) => a > b ? a : b),
+                      timed: exercise.isTimed,
                     ),
                     style: textTheme.titleLarge!.copyWith(
                       color: colorScheme.primary,
@@ -246,15 +245,17 @@ class ExerciseDetailScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              for (final (date, weight) in history.reversed)
+              for (final (date, best) in history.reversed)
                 ListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   title: Text(dateFormat.format(date)),
                   trailing: Text(
-                    l10n.weightWithUnit(
-                      formatKgIn(store.unit, weight),
-                      unitLabel(l10n, store.unit),
+                    progressValueLabel(
+                      l10n,
+                      store.unit,
+                      best,
+                      timed: exercise.isTimed,
                     ),
                     style: textTheme.titleLarge,
                   ),

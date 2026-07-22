@@ -171,4 +171,58 @@ void main() {
     expect(find.text('Exercise 1 of 4'), findsOneWidget);
     expect(find.text('40 kg x 8'), findsOneWidget);
   });
+
+  testWidgets('a held exercise is logged in seconds, with no weight field', (
+    tester,
+  ) async {
+    final store = await openTestStore();
+    // A one-day plan of nothing but the plank, so the workout screen opens
+    // straight onto a held exercise.
+    await store.setPlan(
+      const Plan(
+        goal: Goal.getFit,
+        level: Level.advanced,
+        days: [
+          PlanDay(
+            key: 'legs',
+            exercises: [
+              PlannedExercise(
+                exerciseId: 'plank',
+                sets: 3,
+                repsMin: 30,
+                repsMax: 45,
+                restSeconds: 60,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    await tester.pumpWidget(SweatlineApp(store: store));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Start workout'));
+    await settleWorkout(tester);
+    await scrollAndTap(tester, find.text('Start lifting'));
+    await settleWorkout(tester);
+
+    // The prescription and the input both read in seconds.
+    expect(find.textContaining('3 sets x 30 to 45 seconds'), findsOneWidget);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -400));
+    await tester.pump();
+    expect(find.text('Seconds *'), findsOneWidget);
+    expect(find.text('Weight (kg) *'), findsNothing);
+
+    // The goal promised cardio, so the last exercise says what to do.
+    expect(
+      find.textContaining('Finish with 15 to 20 minutes of cardio'),
+      findsOneWidget,
+    );
+
+    // A logged hold reads as seconds, not as a weight.
+    await tester.enterText(find.byType(TextFormField).first, '40');
+    await scrollAndTap(tester, find.textContaining('Save set'));
+    await tester.pump();
+    expect(find.text('40 s'), findsOneWidget);
+  });
 }

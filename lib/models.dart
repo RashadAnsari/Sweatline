@@ -20,6 +20,7 @@ class Exercise {
     required this.steps,
     required this.tips,
     this.isCompound = false,
+    this.isTimed = false,
   });
 
   final String id;
@@ -49,6 +50,11 @@ class Exercise {
 
   /// Multi-joint lift: programmed first, heavier, longer rests, warm-ups.
   final bool isCompound;
+
+  /// Held or repeated for time instead of counted in reps (planks, cardio).
+  /// The prescription and the log then read as seconds, and the lift carries
+  /// no weight, so these can never fill a rep-based slot.
+  final bool isTimed;
 }
 
 class PlannedExercise {
@@ -155,6 +161,10 @@ class ExerciseLog {
   double get bestWeight =>
       sets.fold(0, (max, s) => s.weightKg > max ? s.weightKg : max);
 
+  /// The best set counted in reps, or in seconds for a held exercise. This
+  /// is what progresses when there is no weight on the movement.
+  int get bestReps => sets.fold(0, (max, s) => s.reps > max ? s.reps : max);
+
   Map<String, dynamic> toJson() => {
     'exerciseId': exerciseId,
     'sets': sets.map((s) => s.toJson()).toList(),
@@ -176,6 +186,7 @@ class WorkoutDraft {
     required this.startedAt,
     required this.sets,
     this.exerciseIndex,
+    this.exercises,
   });
 
   final String dayKey;
@@ -189,10 +200,17 @@ class WorkoutDraft {
   /// from which sets are still incomplete.
   final int? exerciseIndex;
 
+  /// The exercises actually being trained, which differ from the plan day
+  /// once the lifter swaps one mid-session without changing the plan. Null in
+  /// drafts from before this field existed; the workout screen then falls back
+  /// to the plan day.
+  final List<PlannedExercise>? exercises;
+
   Map<String, dynamic> toJson() => {
     'dayKey': dayKey,
     'startedAt': startedAt.toIso8601String(),
     'exerciseIndex': exerciseIndex,
+    'exercises': exercises?.map((e) => e.toJson()).toList(),
     'sets': sets.map(
       (id, logs) => MapEntry(id, logs.map((s) => s.toJson()).toList()),
     ),
@@ -202,6 +220,9 @@ class WorkoutDraft {
     dayKey: json['dayKey'] as String,
     startedAt: DateTime.parse(json['startedAt'] as String),
     exerciseIndex: json['exerciseIndex'] as int?,
+    exercises: (json['exercises'] as List?)
+        ?.map((e) => PlannedExercise.fromJson(e as Map<String, dynamic>))
+        .toList(),
     sets: (json['sets'] as Map<String, dynamic>).map(
       (id, logs) => MapEntry(
         id,

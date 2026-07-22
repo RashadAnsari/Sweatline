@@ -38,6 +38,12 @@ flutter analyze
 flutter test --exclude-tags golden
 ```
 
+CI runs the same three commands against a pinned SDK
+(`flutter-version` in `.github/workflows/build.yml`), so its results match a
+developer machine on that version. Upgrade the pin and the local SDK
+together: leaving CI on a floating `stable` makes it report warnings against
+an SDK nobody has, which cannot be reproduced or fixed locally.
+
 ## Releases
 
 - Bump `version:` in pubspec.yaml. The build number after `+` must increase on

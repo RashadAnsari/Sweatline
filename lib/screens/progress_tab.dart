@@ -59,7 +59,7 @@ class ProgressTab extends StatelessWidget {
     );
     final trainedExerciseIds = [
       for (final exercise in exerciseLibrary)
-        if (store.weightHistory(exercise.id).isNotEmpty) exercise.id,
+        if (store.progressHistory(exercise.id).isNotEmpty) exercise.id,
     ];
 
     return ListView(
@@ -201,11 +201,13 @@ class _StrengthTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final store = StoreScope.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final unit = unitLabel(l10n, store.unit);
-    final history = store.weightHistory(exerciseId);
+    final timed = exerciseById(exerciseId).isTimed;
+    // A held exercise progresses in seconds, so its change reads in seconds.
+    final unit = timed ? l10n.unitSeconds : unitLabel(l10n, store.unit);
+    final history = store.progressHistory(exerciseId);
     final first = history.first.$2;
     final latest = history.last.$2;
-    final delta = kgToUnit(store.unit, latest - first);
+    final delta = timed ? latest - first : kgToUnit(store.unit, latest - first);
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -222,7 +224,7 @@ class _StrengthTile extends StatelessWidget {
               ),
             ),
       trailing: Text(
-        l10n.weightWithUnit(formatKgIn(store.unit, latest), unit),
+        progressValueLabel(l10n, store.unit, latest, timed: timed),
         style: Theme.of(context).textTheme.titleLarge,
       ),
       onTap: () => Navigator.of(context).push(

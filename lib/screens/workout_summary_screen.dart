@@ -36,16 +36,11 @@ class _WorkoutSummaryScreenState extends State<WorkoutSummaryScreen> {
   /// including parts scrolled out of view.
   final _boundaryKey = GlobalKey();
 
-  /// A record when this session's best beats every session before it.
-  /// First-ever attempts are not records: there is nothing to beat.
-  bool _isRecord(AppStore store, ExerciseLog log) {
-    if (log.sets.isEmpty) return false;
-    final best = store.bestWeightFor(
-      log.exerciseId,
-      before: widget.session.date,
-    );
-    return best != null && log.bestWeight > best;
-  }
+  /// A record when any set of this session beat everything logged before it.
+  bool _isRecord(AppStore store, ExerciseLog log) => log.sets.any(
+    (set) =>
+        store.isRecordSet(log.exerciseId, set, before: widget.session.date),
+  );
 
   /// Renders the summary to a PNG and hands it to the platform share sheet.
   /// A capture failure must never crash the celebration screen.
@@ -186,14 +181,13 @@ class _WorkoutSummaryScreenState extends State<WorkoutSummaryScreen> {
                           : Text(exerciseById(log.exerciseId).name),
                       subtitle: Text(l10n.setsCount(log.sets.length)),
                       trailing: Text(
-                        l10n.setResult(
-                          formatKgIn(store.unit, log.bestWeight),
-                          unit,
-                          log.sets
-                              .reduce(
-                                (a, b) => a.weightKg >= b.weightKg ? a : b,
-                              )
-                              .reps,
+                        setResultLabel(
+                          l10n,
+                          store.unit,
+                          log.sets.reduce(
+                            (a, b) => a.weightKg >= b.weightKg ? a : b,
+                          ),
+                          timed: exerciseById(log.exerciseId).isTimed,
                         ),
                         style: textTheme.titleLarge,
                       ),

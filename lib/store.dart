@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'database.dart';
+import 'exercise_library.dart';
+import 'labels.dart';
 import 'models.dart';
 import 'plan_generator.dart';
 
@@ -168,11 +170,13 @@ class AppStore extends ChangeNotifier {
   }
 
   /// Replaces the exercise at [index] of the [dayKey] day with [newExerciseId],
-  /// keeping the slot's sets, reps, rest, and warm-up: only the movement
-  /// changes. Persists the plan and, unlike [setPlan], keeps any in-progress
-  /// draft, pruning only the swapped-out exercise from it so its saved sets do
-  /// not resurface under a movement the plan no longer contains. A no-op when
-  /// there is no plan, the day is unknown, or the index is out of range.
+  /// keeping the slot's sets, reps, rest, and warm-up so the day keeps its
+  /// shape; [prescriptionForSwap] adjusts the few movements that cannot honor
+  /// the slot as written. Persists the plan and, unlike [setPlan], keeps any
+  /// in-progress draft, pruning only the swapped-out exercise from it so its
+  /// saved sets do not resurface under a movement the plan no longer contains.
+  /// A no-op when there is no plan, the day is unknown, or the index is out of
+  /// range.
   Future<void> replacePlanExercise(
     String dayKey,
     int index,
@@ -183,14 +187,7 @@ class AppStore extends ChangeNotifier {
       if (index < 0 || index >= exercises.length) return false;
       final old = exercises[index];
       oldExerciseId = old.exerciseId;
-      exercises[index] = PlannedExercise(
-        exerciseId: newExerciseId,
-        sets: old.sets,
-        repsMin: old.repsMin,
-        repsMax: old.repsMax,
-        restSeconds: old.restSeconds,
-        warmupSets: old.warmupSets,
-      );
+      exercises[index] = prescriptionForSwap(old, newExerciseId);
       return true;
     });
     if (!changed) return;
@@ -205,6 +202,9 @@ class AppStore extends ChangeNotifier {
         dayKey: draft.dayKey,
         startedAt: draft.startedAt,
         exerciseIndex: draft.exerciseIndex,
+        // The running session keeps the movements it is actually doing,
+        // which the workout screen saved just before asking for this.
+        exercises: draft.exercises,
         sets: sets,
       );
       await _db.setMeta(_draftKey, jsonEncode(_draft!.toJson()));
@@ -440,17 +440,97 @@ class AppStore extends ChangeNotifier {
     return null;
   }
 
-  /// Trainer suggestion: repeat last weight, or add the exercise's
-  /// progression increment once every set hit the top of the rep range.
+  /// The most recent logs for an exercise, newest first, at most [limit].
+  List<ExerciseLog> recentLogsFor(String exerciseId, int limit) {
+    final logs = <ExerciseLog>[];
+    for (final session in _sessions) {
+      for (final log in session.logs) {
+        if (log.exerciseId == exerciseId && log.sets.isNotEmpty) {
+          logs.add(log);
+          if (logs.length == limit) return logs;
+        }
+      }
+    }
+    return logs;
+  }
+
+  /// Whether every prescribed set was completed at the top of the rep range,
+  /// which is what earns the next jump in weight (double progression).
+  bool _metTarget(ExerciseLog log, PlannedExercise planned) =>
+      log.sets.length >= planned.sets &&
+      log.sets.every((s) => s.reps >= planned.repsMax);
+
+  /// Sessions at the same weight, none of them completed, before the trainer
+  /// calls a stall and takes weight off the bar.
+  static const _stallSessions = 3;
+
+  /// Trainer suggestion for the next working weight, or null when there is
+  /// nothing to suggest: a held exercise carries no weight, and a movement
+  /// never trained before has no history to build on.
+  ///
+  /// Repeat the last weight, step up once every set hit the top of the rep
+  /// range, or back off to about 90% after three sessions stuck at the same
+  /// weight. Grinding the same failed weight forever is the most common way
+  /// a self-guided lifter stops making progress.
   double? suggestedWeight(PlannedExercise planned) {
+    if (exerciseById(planned.exerciseId).isTimed) return null;
+    final recent = recentLogsFor(planned.exerciseId, _stallSessions);
+    if (recent.isEmpty) return null;
+    final last = recent.first;
+    if (_metTarget(last, planned)) {
+      final step = progressionStep(_unit, planned.exerciseId);
+      return unitToKg(_unit, kgToUnit(_unit, last.bestWeight) + step);
+    }
+    if (isStalled(planned)) {
+      final deload = _deloadWeight(last.bestWeight, planned.exerciseId);
+      if (deload != null) return deload;
+    }
+    return last.bestWeight;
+  }
+
+  /// Whether the last [_stallSessions] sessions all sat at the same weight
+  /// without ever completing the prescription.
+  bool isStalled(PlannedExercise planned) {
+    if (exerciseById(planned.exerciseId).isTimed) return false;
+    final recent = recentLogsFor(planned.exerciseId, _stallSessions);
+    if (recent.length < _stallSessions) return false;
+    final weight = recent.first.bestWeight;
+    return recent.every((log) => log.bestWeight == weight) &&
+        !recent.any((log) => _metTarget(log, planned));
+  }
+
+  /// About 90% of [currentKg], rounded down to a weight the gym can actually
+  /// load in the lifter's unit. Null when that lands at or below zero, or
+  /// would not lighten the bar at all, in which case there is nothing to
+  /// deload from.
+  double? _deloadWeight(double currentKg, String exerciseId) {
+    final step = progressionStep(_unit, exerciseId);
+    final current = kgToUnit(_unit, currentKg);
+    final target = (current * 0.9 / step).floorToDouble() * step;
+    if (target <= 0 || target >= current) return null;
+    return unitToKg(_unit, target);
+  }
+
+  /// Target reps for the set at [setIndex], or seconds for a held exercise.
+  ///
+  /// Add one rep (or a few seconds) to what was done last time, up to the top
+  /// of the range: repeating last session's reps exactly is what leaves a
+  /// lifter stuck at the same numbers forever. Start at the bottom of the
+  /// range on a first attempt and whenever the weight has just gone up.
+  int suggestedReps(PlannedExercise planned, int setIndex) {
     final last = lastLogFor(planned.exerciseId);
-    if (last == null) return null;
-    final allSetsAtTop =
-        last.sets.length >= planned.sets &&
-        last.sets.every((s) => s.reps >= planned.repsMax);
-    return allSetsAtTop
-        ? last.bestWeight + incrementFor(planned.exerciseId)
-        : last.bestWeight;
+    if (last == null || setIndex >= last.sets.length) return planned.repsMin;
+    final suggestion = suggestedWeight(planned);
+    if (suggestion != null && suggestion != last.bestWeight) {
+      return planned.repsMin;
+    }
+    final step = exerciseById(planned.exerciseId).isTimed
+        ? timedProgressionSeconds
+        : 1;
+    return (last.sets[setIndex].reps + step).clamp(
+      planned.repsMin,
+      planned.repsMax,
+    );
   }
 
   int get sessionsThisWeek {
@@ -483,6 +563,31 @@ class AppStore extends ChangeNotifier {
     return streak;
   }
 
+  /// Whether [set] beats every set of this exercise logged before it, either
+  /// by weight or by reps at the same weight: 60 kg for 10 is a record over
+  /// 60 kg for 8, which comparing weights alone would miss. For a held
+  /// exercise, whose sets carry no weight, this is the longest hold so far.
+  /// With [before], only sessions strictly earlier than that date count, so a
+  /// just-saved session can be judged against everything before it.
+  /// First-ever attempts are not records: there is nothing to beat.
+  bool isRecordSet(String exerciseId, SetLog set, {DateTime? before}) {
+    var trainedBefore = false;
+    for (final session in _sessions) {
+      if (before != null && !session.date.isBefore(before)) continue;
+      for (final log in session.logs) {
+        if (log.exerciseId != exerciseId) continue;
+        for (final earlier in log.sets) {
+          trainedBefore = true;
+          if (earlier.weightKg > set.weightKg) return false;
+          if (earlier.weightKg == set.weightKg && earlier.reps >= set.reps) {
+            return false;
+          }
+        }
+      }
+    }
+    return trainedBefore;
+  }
+
   /// Heaviest weight ever logged for an exercise, or null if never trained.
   /// With [before], only sessions strictly earlier than that date count, so
   /// a just-saved session can be compared against everything before it.
@@ -498,13 +603,19 @@ class AppStore extends ChangeNotifier {
     return best;
   }
 
-  /// Best weight per session for an exercise, oldest first, for trend display.
-  List<(DateTime, double)> weightHistory(String exerciseId) {
+  /// What the lifter is beating over time, per session, oldest first: the
+  /// best weight, or the longest hold in seconds for a held exercise, whose
+  /// weight is always zero and would otherwise draw a flat line.
+  List<(DateTime, double)> progressHistory(String exerciseId) {
+    final timed = exerciseById(exerciseId).isTimed;
     final points = <(DateTime, double)>[];
     for (final session in _sessions.reversed) {
       for (final log in session.logs) {
         if (log.exerciseId == exerciseId && log.sets.isNotEmpty) {
-          points.add((session.date, log.bestWeight));
+          points.add((
+            session.date,
+            timed ? log.bestReps.toDouble() : log.bestWeight,
+          ));
         }
       }
     }

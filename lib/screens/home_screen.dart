@@ -378,7 +378,7 @@ class _PlannedExerciseTile extends StatelessWidget {
       ),
       title: Text(exercise.name),
       subtitle: Text(
-        '${l10n.setsByReps(planned.sets, planned.repsMin, planned.repsMax)} · '
+        '${setsAndRepsLabel(l10n, planned.sets, planned.repsMin, planned.repsMax, timed: exercise.isTimed)} · '
         '${l10n.restInfo(planned.restSeconds)}',
       ),
       trailing: actions.isEmpty
@@ -537,6 +537,22 @@ class _PlanTab extends StatelessWidget {
                         ),
                     ],
                   ),
+                  // Both of these goals depend on cardio, so the plan states
+                  // it instead of leaving it to a card mid-workout.
+                  if (plan.goal == Goal.loseWeight || plan.goal == Goal.getFit)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        Icons.directions_run,
+                        color: colorScheme.primary,
+                      ),
+                      title: Text(l10n.planCardioNote),
+                      subtitle: Text(
+                        plan.goal == Goal.loseWeight
+                            ? l10n.cardioFinisher
+                            : l10n.cardioFinisherFit,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -605,7 +621,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
             // Live preview in the exact format the plan tiles use, so the
             // result of the edit is visible before saving.
             Text(
-              '${l10n.setsByReps(_sets, _repsMin, _repsMax)} · '
+              '${setsAndRepsLabel(l10n, _sets, _repsMin, _repsMax, timed: exerciseById(widget.planned.exerciseId).isTimed)} · '
               '${l10n.restInfo(_restSeconds)}',
               style: textTheme.bodyMedium!.copyWith(
                 color: Theme.of(context).colorScheme.primary,

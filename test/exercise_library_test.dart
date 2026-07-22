@@ -35,6 +35,27 @@ void main() {
     }
   });
 
+  test('similarExercises never offers cardio in place of a lift', () {
+    // Calf raises share the calves with jump rope, leg extensions share the
+    // quads with the bike: conditioning work must not inherit a lifting slot.
+    for (final id in ['calfRaise', 'legExtension', 'rearDeltFly', 'squat']) {
+      for (final e in similarExercises(id)) {
+        expect(e.group, isNot('cardio'), reason: 'offered ${e.id} for $id');
+      }
+    }
+  });
+
+  test('similarExercises keeps held and counted work apart', () {
+    // A plank prescribed in seconds must never be swapped for a rep-based
+    // movement, or the other way round.
+    for (final e in similarExercises('plank')) {
+      expect(e.isTimed, isTrue);
+    }
+    for (final e in similarExercises('cableCrunch')) {
+      expect(e.isTimed, isFalse, reason: '${e.id} is held, not counted');
+    }
+  });
+
   test('similarExercises ranks higher primary-muscle overlap first', () {
     final source = exerciseById('benchPress');
     final results = similarExercises('benchPress');

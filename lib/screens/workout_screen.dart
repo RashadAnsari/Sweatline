@@ -10,6 +10,7 @@ import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
 import '../models.dart';
+import '../plan_generator.dart';
 import '../store.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/exercise_figure.dart';
@@ -94,6 +95,11 @@ class _WorkoutScreenState extends State<WorkoutScreen>
 
   PlannedExercise get _planned => _exercises[_exerciseIndex];
   List<SetLog> get _currentSets => _loggedSets[_exerciseIndex];
+
+  /// A held exercise is logged in seconds and carries no weight, so its page
+  /// swaps the reps field for a seconds field and drops the weight input.
+  bool get _isTimed => exerciseById(_planned.exerciseId).isTimed;
+
   bool get _isLastExercise => _exerciseIndex == _exercises.length - 1;
   bool get _hasAnyLoggedSet => _loggedSets.any((sets) => sets.isNotEmpty);
 
@@ -151,6 +157,13 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     final draft = StoreScope.of(context).draft;
     if (draft == null || draft.dayKey != widget.planDay.key) return;
     _startedAt = draft.startedAt;
+    // A mid-session swap that was not written back to the plan lives only in
+    // the draft, so its movements win over the plan day's. The length is
+    // fixed at construction, so only a draft of the same size can be trusted.
+    final savedExercises = draft.exercises;
+    if (savedExercises != null && savedExercises.length == _exercises.length) {
+      _exercises.setAll(0, savedExercises);
+    }
     for (var i = 0; i < _exercises.length; i++) {
       final saved = draft.sets[_exercises[i].exerciseId];
       if (saved != null) _loggedSets[i] = List.of(saved);
@@ -181,6 +194,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
         dayKey: widget.planDay.key,
         startedAt: _startedAt,
         exerciseIndex: _exerciseIndex,
+        exercises: _exercises,
         sets: {
           for (var i = 0; i < _loggedSets.length; i++)
             if (_loggedSets[i].isNotEmpty)
@@ -199,23 +213,10 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     _prefillReps();
   }
 
-  /// Target reps for the upcoming set: match last session's same set, drop
-  /// to the bottom of the range when the weight just went up, or start at
-  /// the bottom of the range on a first attempt.
   void _prefillReps() {
     final store = StoreScope.of(context);
-    final last = store.lastLogFor(_planned.exerciseId);
-    final suggestion = store.suggestedWeight(_planned);
-    final setIndex = _currentSets.length;
-    final int reps;
-    if (last == null || (suggestion != null && suggestion > last.bestWeight)) {
-      reps = _planned.repsMin;
-    } else if (setIndex < last.sets.length) {
-      reps = last.sets[setIndex].reps;
-    } else {
-      reps = _planned.repsMin;
-    }
-    _repsController.text = '$reps';
+    _repsController.text =
+        '${store.suggestedReps(_planned, _currentSets.length)}';
   }
 
   /// Loading guide under the weight field for barbell lifts: the plates for
@@ -304,12 +305,36 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     );
   }
 
-  /// A set is a record when it beats the best weight from every earlier
-  /// session. First-ever attempts are not records: there is nothing to beat.
-  bool _isRecordSet(AppStore store, SetLog set) {
-    final best = store.bestWeightFor(_planned.exerciseId);
-    return best != null && set.weightKg > best;
+  /// What the trainer says about the coming sets: how the last session went
+  /// and what to beat today. Held exercises talk in seconds, bodyweight
+  /// movements in reps, and a lift stuck at the same weight for three
+  /// sessions gets told to go lighter rather than grind it again.
+  String _trainerTip(AppLocalizations l10n, AppStore store) {
+    final last = store.lastLogFor(_planned.exerciseId);
+    final unit = unitLabel(l10n, store.unit);
+    if (_isTimed) {
+      if (last == null) return l10n.trainerTipTimedFirst;
+      return l10n.trainerTipTimedRepeat(_bestReps(last));
+    }
+    if (last == null) return l10n.trainerTipFirstTime;
+    final suggestion = store.suggestedWeight(_planned)!;
+    if (suggestion > last.bestWeight) {
+      return l10n.trainerTipIncrease(formatKgIn(store.unit, suggestion), unit);
+    }
+    if (suggestion < last.bestWeight) {
+      return l10n.trainerTipDeload(formatKgIn(store.unit, suggestion), unit);
+    }
+    // Bodyweight work logs no load, so there is no weight to quote back.
+    if (last.bestWeight == 0) return l10n.trainerTipBodyweight(_bestReps(last));
+    return l10n.trainerTipRepeat(formatKgIn(store.unit, last.bestWeight), unit);
   }
+
+  /// The best set of a log, counted in reps or seconds.
+  int _bestReps(ExerciseLog log) =>
+      log.sets.fold(0, (best, s) => s.reps > best ? s.reps : best);
+
+  bool _isRecordSet(AppStore store, SetLog set) =>
+      store.isRecordSet(_planned.exerciseId, set);
 
   double? _parseNumber(String? value) => parseWeightInput(value);
 
@@ -322,7 +347,10 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     setState(() {
       _currentSets.add(
         SetLog(
-          weightKg: unitToKg(unit, _parseNumber(_weightController.text)!),
+          // A hold has no weight field: the seconds are the whole set.
+          weightKg: _isTimed
+              ? 0
+              : unitToKg(unit, _parseNumber(_weightController.text)!),
           reps: _parseReps(_repsController.text)!,
         ),
       );
@@ -339,9 +367,12 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     setState(() => _weightController.text = formatWeight(next));
   }
 
-  void _bumpReps(int delta) {
+  /// Steps the reps field by one, or a held exercise's seconds field by the
+  /// same few seconds its progression uses.
+  void _bumpReps(int direction) {
+    final step = _isTimed ? timedProgressionSeconds : 1;
     final current = _parseReps(_repsController.text) ?? _planned.repsMin;
-    final next = (current + delta).clamp(1, 99);
+    final next = (current + direction * step).clamp(1, 999);
     setState(() => _repsController.text = '$next');
   }
 
@@ -404,14 +435,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     }
     final old = _exercises[index];
     setState(() {
-      _exercises[index] = PlannedExercise(
-        exerciseId: pick.exerciseId,
-        sets: old.sets,
-        repsMin: old.repsMin,
-        repsMax: old.repsMax,
-        restSeconds: old.restSeconds,
-        warmupSets: old.warmupSets,
-      );
+      _exercises[index] = prescriptionForSwap(old, pick.exerciseId);
       _loggedSets[index] = [];
       _stopRest();
       _weightController.clear();
@@ -613,22 +637,18 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     final unit = unitLabel(l10n, store.unit);
     final allSetsDone = _currentSets.length >= _planned.sets;
     final resting = _restEndsAt != null;
-    final showCardioFinisher =
-        _isLastExercise && allSetsDone && store.plan?.goal == Goal.loseWeight;
-
-    final suggestion = store.suggestedWeight(_planned);
-    final lastLog = store.lastLogFor(_planned.exerciseId);
-    final String tip;
-    if (lastLog == null) {
-      tip = l10n.trainerTipFirstTime;
-    } else if (suggestion != null && suggestion > lastLog.bestWeight) {
-      tip = l10n.trainerTipIncrease(formatKgIn(store.unit, suggestion), unit);
-    } else {
-      tip = l10n.trainerTipRepeat(
-        formatKgIn(store.unit, lastLog.bestWeight),
-        unit,
-      );
-    }
+    // The cardio both of these goals promise at sign-up. Shown for the whole
+    // last exercise, not only once its sets are done, so nobody who finishes
+    // early leaves without it.
+    final goal = store.plan?.goal;
+    final cardioNote = !_isLastExercise
+        ? null
+        : switch (goal) {
+            Goal.loseWeight => l10n.cardioFinisher,
+            Goal.getFit => l10n.cardioFinisherFit,
+            _ => null,
+          };
+    final tip = _trainerTip(l10n, store);
 
     return ListView(
       key: ValueKey(_exerciseIndex),
@@ -667,7 +687,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
         ),
         Text(
           '${equipmentLabel(l10n, exercise.equipment)} · '
-          '${l10n.setsByReps(_planned.sets, _planned.repsMin, _planned.repsMax)} · '
+          '${setsAndRepsLabel(l10n, _planned.sets, _planned.repsMin, _planned.repsMax, timed: _isTimed)} · '
           '${l10n.restInfo(_planned.restSeconds)}',
           style: textTheme.bodyMedium,
         ),
@@ -742,10 +762,11 @@ class _WorkoutScreenState extends State<WorkoutScreen>
                   )
                 : Text(l10n.setLabel(i + 1)),
             trailing: Text(
-              l10n.setResult(
-                formatKgIn(store.unit, _currentSets[i].weightKg),
-                unit,
-                _currentSets[i].reps,
+              setResultLabel(
+                l10n,
+                store.unit,
+                _currentSets[i],
+                timed: _isTimed,
               ),
               style: textTheme.titleLarge,
             ),
@@ -807,44 +828,47 @@ class _WorkoutScreenState extends State<WorkoutScreen>
             key: _formKeys[_exerciseIndex],
             child: Column(
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    IconButton.filledTonal(
-                      onPressed: () => _bumpWeight(-2.5),
-                      icon: const Icon(Icons.remove),
-                      padding: const EdgeInsets.all(14),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _weightController,
-                        textAlign: TextAlign.center,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: l10n.weightFieldLabel(unit),
-                        ),
-                        onChanged: (_) => setState(() {}),
-                        validator: (value) {
-                          final weight = _parseNumber(value);
-                          return weight == null || weight < 0
-                              ? l10n.weightValidation(unit)
-                              : null;
-                        },
+                // A hold carries no load, so it gets no weight field.
+                if (!_isTimed) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton.filledTonal(
+                        onPressed: () => _bumpWeight(-2.5),
+                        icon: const Icon(Icons.remove),
+                        padding: const EdgeInsets.all(14),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton.filledTonal(
-                      onPressed: () => _bumpWeight(2.5),
-                      icon: const Icon(Icons.add),
-                      padding: const EdgeInsets.all(14),
-                    ),
-                  ],
-                ),
-                if (exercise.equipment == 'barbell') _plateHint(context),
-                const SizedBox(height: 12),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _weightController,
+                          textAlign: TextAlign.center,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: l10n.weightFieldLabel(unit),
+                          ),
+                          onChanged: (_) => setState(() {}),
+                          validator: (value) {
+                            final weight = _parseNumber(value);
+                            return weight == null || weight < 0
+                                ? l10n.weightValidation(unit)
+                                : null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.filledTonal(
+                        onPressed: () => _bumpWeight(2.5),
+                        icon: const Icon(Icons.add),
+                        padding: const EdgeInsets.all(14),
+                      ),
+                    ],
+                  ),
+                  if (exercise.equipment == 'barbell') _plateHint(context),
+                  const SizedBox(height: 12),
+                ],
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -860,13 +884,16 @@ class _WorkoutScreenState extends State<WorkoutScreen>
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                          labelText: l10n.repsFieldLabel,
+                          labelText: _isTimed
+                              ? l10n.secondsFieldLabel
+                              : l10n.repsFieldLabel,
                         ),
                         validator: (value) {
                           final reps = _parseReps(value);
-                          return reps == null || reps <= 0
-                              ? l10n.repsValidation
-                              : null;
+                          if (reps != null && reps > 0) return null;
+                          return _isTimed
+                              ? l10n.secondsValidation
+                              : l10n.repsValidation;
                         },
                       ),
                     ),
@@ -889,9 +916,9 @@ class _WorkoutScreenState extends State<WorkoutScreen>
               ],
             ),
           ),
-        if (showCardioFinisher) ...[
+        if (cardioNote != null) ...[
           const SizedBox(height: 8),
-          _trainerCard(context, Icons.directions_run, l10n.cardioFinisher),
+          _trainerCard(context, Icons.directions_run, cardioNote),
         ],
         const SizedBox(height: 24),
         if (_isLastExercise)
