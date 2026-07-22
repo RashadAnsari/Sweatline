@@ -159,6 +159,11 @@
   "secondaryMusclesLabel": "Also works",
   "diagramFront": "Front",
   "diagramBack": "Back",
+  "myNoteTitle": "My note",
+  "addNoteButton": "Add note",
+  "editNoteButton": "Edit note",
+  "noNoteYet": "Keep your own tips here, like the seat setting or the grip you use.",
+  "noteHint": "For example: seat at 4, narrow grip",
   "yourHistoryTitle": "Your history",
   "noHistoryYet": "You have not done this exercise yet.",
 
@@ -228,10 +233,23 @@
     }
   },
   "doneButton": "Done",
+  "shareButton": "Share",
+  "exportFileButton": "Share backup as a file",
   "exitWorkoutTitle": "Quit this workout?",
   "exitWorkoutBody": "You will lose the sets you saved in this workout.",
   "keepGoing": "Keep going",
   "quit": "Quit",
+  "plateCalcBarOnly": "Use the bar with no plates",
+  "plateCalcPerSideLabel": "Put on each side",
+  "plateCalcTotal": "That makes {weight} {unit}",
+  "@plateCalcTotal": {
+    "placeholders": {
+      "weight": { "type": "String" },
+      "unit": { "type": "String" }
+    }
+  },
+  "newRecord": "New record",
+  "allTimeBest": "All-time best",
   "setResult": "{weight} {unit} x {reps}",
   "@setResult": {
     "placeholders": {
@@ -241,8 +259,19 @@
     }
   },
 
+  "bodyWeightTitle": "Body weight",
+  "addWeightButton": "Add weight",
+  "bodyWeightDialogTitle": "Add your body weight",
+  "noBodyWeightYet": "Track your body weight to see how it changes over time.",
+  "deleteWeightTitle": "Delete this entry?",
+  "deleteWeightBody": "This removes this weight entry from your history.",
+  "deleteWorkoutTitle": "Delete this workout?",
+  "deleteWorkoutBody": "This removes the workout from your history. Your other workouts stay.",
+  "delete": "Delete",
   "statThisWeek": "This week",
   "statTotal": "Total workouts",
+  "statStreak": "Weeks in a row",
+  "weekStreakBody": "You did all your planned workouts. Keep going.",
   "strengthProgressTitle": "Strength progress",
   "historyTitle": "History",
   "noProgressYet": "Finish your first workout to see your progress here.",
@@ -270,6 +299,15 @@
   "themeSystem": "System",
   "themeLight": "Light",
   "themeDark": "Dark",
+  "settingsReminder": "Reminder",
+  "reminderSwitchLabel": "Daily reminder",
+  "reminderSwitchHint": "Get a message when it is time to train",
+  "reminderTimeLabel": "Reminder time",
+  "reminderPermissionDenied": "Notifications are turned off for Sweatline. Allow them in your phone settings first.",
+  "reminderNotificationTitle": "Time to train",
+  "reminderNotificationBody": "Your next workout is ready.",
+  "reminderChannelName": "Daily reminder",
+  "reminderChannelDescription": "A daily message when it is time to train",
   "settingsBackup": "Backup",
   "exportButton": "Copy backup to clipboard",
   "exportDone": "Backup copied. Paste it somewhere safe.",
@@ -300,5 +338,12 @@
   "replaceExerciseClearTitle": "Replace this exercise?",
   "replaceExerciseClearBody": "The sets you saved for this exercise will be removed.",
   "alsoUpdatePlan": "Also change this in my plan",
-  "noSimilarExercises": "No similar exercises to switch to."
+  "noSimilarExercises": "No similar exercises to switch to.",
+  "editExerciseTooltip": "Edit sets and rest",
+  "editSetsLabel": "Sets",
+  "editRepsMinLabel": "Lowest reps",
+  "editRepsMaxLabel": "Highest reps",
+  "editRestLabel": "Rest in seconds",
+  "save": "Save",
+  "reorderTooltip": "Hold and drag to move"
 }

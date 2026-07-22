@@ -17,7 +17,7 @@ class AppDatabase {
 
   final Database _db;
 
-  static const _schemaVersion = 1;
+  static const _schemaVersion = 2;
 
   /// Opens the app database. Pass [path] (e.g. `inMemoryDatabasePath`) in
   /// tests; production uses the default app databases directory.
@@ -36,6 +36,10 @@ class AppDatabase {
         version: _schemaVersion,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onCreate: (db, version) => _createSchema(db),
+        onUpgrade: (db, oldVersion, newVersion) async {
+          // v1 -> v2: body-weight tracking.
+          if (oldVersion < 2) await _createBodyWeightTable(db);
+        },
         singleInstance: singleInstance,
       ),
     );
@@ -83,7 +87,16 @@ class AppDatabase {
     await db.execute(
       'CREATE INDEX idx_set_logs_log ON set_logs(exercise_log_id)',
     );
+    await _createBodyWeightTable(db);
   }
+
+  static Future<void> _createBodyWeightTable(Database db) => db.execute('''
+      CREATE TABLE body_weights(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        weight_kg REAL NOT NULL
+      )
+    ''');
 
   // ----- meta key-value -----
 
@@ -138,6 +151,7 @@ class AppDatabase {
     return [
       for (final row in sessionRows)
         WorkoutSession(
+          id: row['id'] as int,
           date: DateTime.parse(row['date'] as String),
           dayKey: row['day_key'] as String,
           logs: logsBySession[row['id'] as int] ?? const [],
@@ -145,10 +159,15 @@ class AppDatabase {
     ];
   }
 
-  Future<void> insertSession(WorkoutSession session) =>
+  /// Inserts the session and returns its new row id.
+  Future<int> insertSession(WorkoutSession session) =>
       _db.transaction((txn) => _insertSession(txn, session));
 
-  static Future<void> _insertSession(
+  /// Deletes a session; its logs and sets go with it via ON DELETE CASCADE.
+  Future<void> deleteSession(int id) =>
+      _db.delete('sessions', where: 'id = ?', whereArgs: [id]);
+
+  static Future<int> _insertSession(
     DatabaseExecutor txn,
     WorkoutSession session,
   ) async {
@@ -172,7 +191,44 @@ class AppDatabase {
         });
       }
     }
+    return sessionId;
   }
+
+  // ----- body weight -----
+
+  /// All body-weight entries, newest first.
+  Future<List<BodyWeightEntry>> loadBodyWeights() async {
+    final rows = await _db.query('body_weights', orderBy: 'date DESC');
+    return [
+      for (final row in rows)
+        BodyWeightEntry(
+          id: row['id'] as int,
+          date: DateTime.parse(row['date'] as String),
+          weightKg: (row['weight_kg'] as num).toDouble(),
+        ),
+    ];
+  }
+
+  /// Inserts a body-weight entry and returns its new row id.
+  Future<int> insertBodyWeight(BodyWeightEntry entry) => _db.insert(
+    'body_weights',
+    {'date': entry.date.toIso8601String(), 'weight_kg': entry.weightKg},
+  );
+
+  Future<void> deleteBodyWeight(int id) =>
+      _db.delete('body_weights', where: 'id = ?', whereArgs: [id]);
+
+  /// Replaces all body-weight entries (used by backup restore).
+  Future<void> replaceAllBodyWeights(List<BodyWeightEntry> entries) =>
+      _db.transaction((txn) async {
+        await txn.delete('body_weights');
+        for (final entry in entries) {
+          await txn.insert('body_weights', {
+            'date': entry.date.toIso8601String(),
+            'weight_kg': entry.weightKg,
+          });
+        }
+      });
 
   /// Replaces the entire session history (used by backup restore).
   Future<void> replaceAllSessions(List<WorkoutSession> sessions) =>

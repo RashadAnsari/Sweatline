@@ -213,12 +213,40 @@ class WorkoutDraft {
   );
 }
 
+/// One body-weight measurement. Weight is stored in kilograms like every
+/// other weight in the app.
+class BodyWeightEntry {
+  const BodyWeightEntry({this.id, required this.date, required this.weightKg});
+
+  /// Database row id; null until saved. Not part of the JSON backup format.
+  final int? id;
+
+  final DateTime date;
+  final double weightKg;
+
+  Map<String, dynamic> toJson() => {
+    'date': date.toIso8601String(),
+    'weightKg': weightKg,
+  };
+
+  factory BodyWeightEntry.fromJson(Map<String, dynamic> json) =>
+      BodyWeightEntry(
+        date: DateTime.parse(json['date'] as String),
+        weightKg: (json['weightKg'] as num).toDouble(),
+      );
+}
+
 class WorkoutSession {
   const WorkoutSession({
+    this.id,
     required this.date,
     required this.dayKey,
     required this.logs,
   });
+
+  /// Database row id; null until the session has been saved. Not part of
+  /// the JSON backup format: ids are reassigned on restore.
+  final int? id;
 
   final DateTime date;
   final String dayKey;

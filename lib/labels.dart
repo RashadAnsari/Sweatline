@@ -66,6 +66,10 @@ String levelLabel(AppLocalizations l10n, Level level) => switch (level) {
   Level.advanced => l10n.levelAdvanced,
 };
 
+/// Parses user weight input, accepting a comma as the decimal separator.
+double? parseWeightInput(String? value) =>
+    double.tryParse((value ?? '').trim().replaceAll(',', '.'));
+
 /// Weights render without a trailing .0 (20, 22.5).
 String formatWeight(double weight) => weight == weight.roundToDouble()
     ? weight.toStringAsFixed(0)

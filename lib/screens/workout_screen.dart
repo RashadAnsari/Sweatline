@@ -10,12 +10,37 @@ import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
 import '../models.dart';
+import '../store.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/exercise_figure.dart';
 import '../widgets/exercise_picker.dart';
+import '../widgets/note_card.dart';
 import '../widgets/page_body.dart';
+import '../widgets/record_chip.dart';
 import 'exercise_detail_screen.dart';
 import 'workout_summary_screen.dart';
+
+/// Standard Olympic bar and plate sizes per display unit, values in that
+/// unit: a 20 kg bar with kg plates, a 45 lb bar with lb plates.
+const _barWeight = {WeightUnit.kg: 20.0, WeightUnit.lb: 45.0};
+const _plateSizes = {
+  WeightUnit.kg: [25.0, 20.0, 15.0, 10.0, 5.0, 2.5, 1.25],
+  WeightUnit.lb: [45.0, 35.0, 25.0, 10.0, 5.0, 2.5],
+};
+
+/// Plates for one side of the bar to reach [targetWeight], heaviest first,
+/// filled greedily. Comes as close as the plate sizes allow from below.
+List<double> platesPerSide(WeightUnit unit, double targetWeight) {
+  var remaining = (targetWeight - _barWeight[unit]!) / 2;
+  final plates = <double>[];
+  for (final plate in _plateSizes[unit]!) {
+    while (remaining >= plate - 0.001) {
+      plates.add(plate);
+      remaining -= plate;
+    }
+  }
+  return plates;
+}
 
 /// Guided workout session: walks through the day's exercises one at a time,
 /// prescribes warm-ups and a target weight, logs every set, and runs the
@@ -193,8 +218,100 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     _repsController.text = '$reps';
   }
 
-  double? _parseNumber(String? value) =>
-      double.tryParse((value ?? '').trim().replaceAll(',', '.'));
+  /// Loading guide under the weight field for barbell lifts: the plates for
+  /// one side of the bar, drawn as tiles whose height scales with the plate
+  /// size, the way they would hang on the bar.
+  Widget _plateHint(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final store = StoreScope.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final target = _parseNumber(_weightController.text);
+    if (target == null || target <= 0) return const SizedBox.shrink();
+
+    final hintStyle = textTheme.bodySmall!.copyWith(
+      color: colorScheme.onSurfaceVariant,
+    );
+    final plates = platesPerSide(store.unit, target);
+    if (plates.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Text(
+          l10n.plateCalcBarOnly,
+          textAlign: TextAlign.center,
+          style: hintStyle,
+        ),
+      );
+    }
+
+    final maxPlate = _plateSizes[store.unit]!.first;
+    final total =
+        _barWeight[store.unit]! + 2 * plates.fold(0.0, (sum, p) => sum + p);
+    final rounded = (total - target).abs() >= 0.001;
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Semantics(
+        container: true,
+        label:
+            '${l10n.plateCalcPerSideLabel}: '
+            '${plates.map(formatWeight).join(', ')}',
+        child: ExcludeSemantics(
+          child: Column(
+            children: [
+              Text(
+                l10n.plateCalcPerSideLabel.toUpperCase(),
+                style: textTheme.labelSmall!.copyWith(
+                  letterSpacing: 2,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final plate in plates)
+                    Container(
+                      width: 34,
+                      height: 22 + 14 * (plate / maxPlate),
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: colorScheme.outline),
+                      ),
+                      child: Text(
+                        formatWeight(plate),
+                        style: textTheme.labelMedium,
+                      ),
+                    ),
+                ],
+              ),
+              if (rounded) ...[
+                const SizedBox(height: 4),
+                Text(
+                  l10n.plateCalcTotal(
+                    formatWeight(total),
+                    unitLabel(l10n, store.unit),
+                  ),
+                  style: hintStyle,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// A set is a record when it beats the best weight from every earlier
+  /// session. First-ever attempts are not records: there is nothing to beat.
+  bool _isRecordSet(AppStore store, SetLog set) {
+    final best = store.bestWeightFor(_planned.exerciseId);
+    return best != null && set.weightKg > best;
+  }
+
+  double? _parseNumber(String? value) => parseWeightInput(value);
 
   int? _parseReps(String? value) => int.tryParse((value ?? '').trim());
 
@@ -597,6 +714,10 @@ class _WorkoutScreenState extends State<WorkoutScreen>
         ),
         const SizedBox(height: 14),
         _trainerCard(context, Icons.tips_and_updates, tip),
+        if (store.noteFor(_planned.exerciseId) case final String note) ...[
+          const SizedBox(height: 8),
+          NoteCard(text: note),
+        ],
         if (_planned.warmupSets > 0 && _currentSets.isEmpty) ...[
           const SizedBox(height: 8),
           _trainerCard(
@@ -611,7 +732,15 @@ class _WorkoutScreenState extends State<WorkoutScreen>
             dense: true,
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.check_circle, color: colorScheme.primary),
-            title: Text(l10n.setLabel(i + 1)),
+            title: _isRecordSet(store, _currentSets[i])
+                ? Row(
+                    children: [
+                      Text(l10n.setLabel(i + 1)),
+                      const SizedBox(width: 8),
+                      const RecordChip(),
+                    ],
+                  )
+                : Text(l10n.setLabel(i + 1)),
             trailing: Text(
               l10n.setResult(
                 formatKgIn(store.unit, _currentSets[i].weightKg),
@@ -697,6 +826,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
                         decoration: InputDecoration(
                           labelText: l10n.weightFieldLabel(unit),
                         ),
+                        onChanged: (_) => setState(() {}),
                         validator: (value) {
                           final weight = _parseNumber(value);
                           return weight == null || weight < 0
@@ -713,6 +843,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
                     ),
                   ],
                 ),
+                if (exercise.equipment == 'barbell') _plateHint(context),
                 const SizedBox(height: 12),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,

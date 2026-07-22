@@ -74,21 +74,31 @@ On Android, download the APK from the
   rest periods tuned per goal; double-progression weight suggestions.
 - **Guided workouts**: one exercise at a time, target weight from your last
   session, set logging, and a wall-clock rest timer with a haptic buzz.
-  The screen stays awake, and an in-progress workout survives an app kill
+  Barbell lifts show which plates to put on each side of the bar. The
+  screen stays awake, and an in-progress workout survives an app kill
   (auto-saved draft with resume).
-- **Swap exercises**: replace any move with a similar one that trains the
-  same muscles and fills the same role (a compound for a compound, an
-  isolation for an isolation). Swap just for today mid-workout, or save the
-  change to your plan.
+- **Personal records**: beat your old best weight and the set gets a trophy,
+  live during the workout and again on the summary. Every exercise shows
+  its all-time best.
+- **Make the plan yours**: swap any move for a similar one (just for today
+  mid-workout, or saved to the plan), reorder a day's exercises by
+  dragging, and edit sets, rep range, and rest per exercise. Keep a
+  personal note per exercise (seat setting, grip) that shows up
+  mid-workout.
 - **Exercise encyclopedia**: 63 exercises with equipment, animated
   movement pictograms (a figure tweening between start and end position,
   drawn in code from pose data in `lib/exercise_poses.dart`), muscle maps
   (front/back diagrams with primary and secondary muscles highlighted),
   step-by-step instructions, and trainer form cues.
-- **Progress tracking**: weekly and total stats, per-exercise strength
-  trends, and full session history.
+- **Progress tracking**: weekly and total stats, a weeks-in-a-row streak,
+  per-exercise strength trends, body-weight tracking with a trend line, and
+  full session history with the option to delete a mislogged workout.
+- **Share it**: send the workout summary as an image to any app from the
+  platform share sheet.
+- **Daily reminder**: an optional local notification at your chosen time.
+  Scheduled entirely on the device, like everything else.
 - **Settings**: kg/lb display units (storage is always kg), light/dark/system
-  theme, clipboard backup and restore.
+  theme, and backup as a shareable file or via the clipboard.
 
 ## Development
 

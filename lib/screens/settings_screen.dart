@@ -1,17 +1,64 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
 import '../models.dart';
+import '../reminders.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/page_body.dart';
 
-/// Units, appearance, backup/restore, and about.
+/// Units, appearance, daily reminder, backup/restore, and about.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  static const _defaultReminderTime = TimeOfDay(hour: 18, minute: 0);
+
+  Future<void> _scheduleReminder(AppLocalizations l10n, TimeOfDay time) =>
+      ReminderService.instance.scheduleDaily(
+        time,
+        title: l10n.reminderNotificationTitle,
+        body: l10n.reminderNotificationBody,
+        channelName: l10n.reminderChannelName,
+        channelDescription: l10n.reminderChannelDescription,
+      );
+
+  Future<void> _toggleReminder(BuildContext context, bool on) async {
+    final l10n = AppLocalizations.of(context)!;
+    final store = StoreScope.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    if (!on) {
+      await ReminderService.instance.cancel();
+      await store.setReminderTime(null);
+      return;
+    }
+    final granted = await ReminderService.instance.requestPermission();
+    if (!granted) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.reminderPermissionDenied)),
+      );
+      return;
+    }
+    await store.setReminderTime(_defaultReminderTime);
+    await _scheduleReminder(l10n, _defaultReminderTime);
+  }
+
+  Future<void> _pickReminderTime(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final store = StoreScope.of(context);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: store.reminderTime ?? _defaultReminderTime,
+    );
+    if (picked == null) return;
+    await store.setReminderTime(picked);
+    await _scheduleReminder(l10n, picked);
+  }
 
   Future<void> _export(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
@@ -20,6 +67,20 @@ class SettingsScreen extends StatelessWidget {
       ClipboardData(text: StoreScope.of(context).exportData()),
     );
     messenger.showSnackBar(SnackBar(content: Text(l10n.exportDone)));
+  }
+
+  /// Hands the backup to the platform share sheet as a JSON file, so it can
+  /// be saved to Files, a drive, or sent to another device.
+  Future<void> _shareBackupFile(BuildContext context) async {
+    final backup = StoreScope.of(context).exportData();
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [
+          XFile.fromData(utf8.encode(backup), mimeType: 'application/json'),
+        ],
+        fileNameOverrides: const ['sweatline-backup.json'],
+      ),
+    );
   }
 
   Future<void> _import(BuildContext context) async {
@@ -91,7 +152,33 @@ class SettingsScreen extends StatelessWidget {
                   store.setThemeMode(selection.first),
             ),
             const SizedBox(height: 24),
+            Text(l10n.settingsReminder, style: textTheme.titleMedium),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.reminderSwitchLabel),
+              subtitle: Text(l10n.reminderSwitchHint),
+              value: store.reminderTime != null,
+              onChanged: (on) => _toggleReminder(context, on),
+            ),
+            if (store.reminderTime != null)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.schedule),
+                title: Text(l10n.reminderTimeLabel),
+                trailing: Text(
+                  store.reminderTime!.format(context),
+                  style: textTheme.titleLarge,
+                ),
+                onTap: () => _pickReminderTime(context),
+              ),
+            const SizedBox(height: 24),
             Text(l10n.settingsBackup, style: textTheme.titleMedium),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => _shareBackupFile(context),
+              icon: Icon(Icons.adaptive.share),
+              label: Text(l10n.exportFileButton),
+            ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () => _export(context),

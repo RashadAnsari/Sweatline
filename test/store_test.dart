@@ -231,6 +231,74 @@ void main() {
     },
   );
 
+  test('updatePlanPrescription rewrites sets, reps, and rest only', () async {
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.buildMuscle,
+        level: Level.beginner,
+        daysPerWeek: 3,
+      ),
+    );
+    final pushIndex = store.plan!.days.indexWhere((d) => d.key == 'push');
+    final original = store.plan!.days[pushIndex].exercises.first;
+
+    await store.updatePlanPrescription(
+      'push',
+      0,
+      sets: 5,
+      repsMin: 5,
+      repsMax: 5,
+      restSeconds: 180,
+    );
+
+    final updated = store.plan!.days[pushIndex].exercises.first;
+    expect(updated.exerciseId, original.exerciseId);
+    expect(updated.warmupSets, original.warmupSets);
+    expect(updated.sets, 5);
+    expect(updated.repsMin, 5);
+    expect(updated.repsMax, 5);
+    expect(updated.restSeconds, 180);
+
+    final reloaded = await AppStore.open(db);
+    expect(reloaded.plan!.days[pushIndex].exercises.first.sets, 5);
+  });
+
+  test('movePlanExercise reorders within a day and persists', () async {
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.buildMuscle,
+        level: Level.beginner,
+        daysPerWeek: 3,
+      ),
+    );
+    final pushIndex = store.plan!.days.indexWhere((d) => d.key == 'push');
+    final ids = [
+      for (final e in store.plan!.days[pushIndex].exercises) e.exerciseId,
+    ];
+
+    await store.movePlanExercise('push', 0, 2);
+
+    final moved = [
+      for (final e in store.plan!.days[pushIndex].exercises) e.exerciseId,
+    ];
+    expect(moved, [ids[1], ids[2], ids[0], ...ids.sublist(3)]);
+
+    // Out-of-range moves are no-ops.
+    await store.movePlanExercise('push', 0, 99);
+    expect([
+      for (final e in store.plan!.days[pushIndex].exercises) e.exerciseId,
+    ], moved);
+
+    final reloaded = await AppStore.open(db);
+    expect([
+      for (final e in reloaded.plan!.days[pushIndex].exercises) e.exerciseId,
+    ], moved);
+  });
+
   test('settings persist across store instances', () async {
     final db = await openTestDatabase();
     final store = await AppStore.open(db);
@@ -240,6 +308,154 @@ void main() {
     final reloaded = await AppStore.open(db);
     expect(reloaded.unit, WeightUnit.lb);
     expect(reloaded.themeMode, ThemeMode.dark);
+  });
+
+  test('bestWeightFor finds the all-time best and respects a cutoff', () async {
+    final store = await openTestStore();
+    expect(store.bestWeightFor('benchPress'), isNull);
+
+    await store.addSession(
+      WorkoutSession(
+        date: DateTime(2026, 7, 1),
+        dayKey: 'push',
+        logs: const [
+          ExerciseLog(
+            exerciseId: 'benchPress',
+            sets: [SetLog(weightKg: 40, reps: 8)],
+          ),
+        ],
+      ),
+    );
+    await store.addSession(
+      WorkoutSession(
+        date: DateTime(2026, 7, 8),
+        dayKey: 'push',
+        logs: const [
+          ExerciseLog(
+            exerciseId: 'benchPress',
+            sets: [SetLog(weightKg: 45, reps: 6)],
+          ),
+        ],
+      ),
+    );
+
+    expect(store.bestWeightFor('benchPress'), 45);
+    // The cutoff excludes the session on that exact date.
+    expect(store.bestWeightFor('benchPress', before: DateTime(2026, 7, 8)), 40);
+    expect(store.bestWeightFor('squat'), isNull);
+  });
+
+  test('streakWeeks counts full weeks and tolerates the current one', () async {
+    final store = await openTestStore();
+    expect(store.streakWeeks(DateTime(2026, 7, 22)), 0);
+
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.buildMuscle,
+        level: Level.beginner,
+        daysPerWeek: 3,
+      ),
+    );
+    // July 22, 2026 is a Wednesday; its week starts Monday July 20.
+    Future<void> trainOn(DateTime date) => store.addSession(
+      WorkoutSession(date: date, dayKey: 'push', logs: const []),
+    );
+
+    // Two full weeks before the current one.
+    for (final day in [6, 8, 10, 13, 15, 17]) {
+      await trainOn(DateTime(2026, 7, day));
+    }
+    // The current week is in progress: it neither counts nor breaks.
+    await trainOn(DateTime(2026, 7, 20));
+    expect(store.streakWeeks(DateTime(2026, 7, 22)), 2);
+
+    // Meeting the target this week extends the streak to three.
+    await trainOn(DateTime(2026, 7, 21));
+    await trainOn(DateTime(2026, 7, 22, 9));
+    expect(store.streakWeeks(DateTime(2026, 7, 22, 18)), 3);
+  });
+
+  test('streakWeeks is broken by an empty week', () async {
+    final store = await openTestStore();
+    await store.setPlan(
+      generatePlan(
+        goal: Goal.buildMuscle,
+        level: Level.beginner,
+        daysPerWeek: 3,
+      ),
+    );
+    // A full week two weeks back, nothing last week.
+    for (final day in [6, 8, 10]) {
+      await store.addSession(
+        WorkoutSession(
+          date: DateTime(2026, 7, day),
+          dayKey: 'push',
+          logs: const [],
+        ),
+      );
+    }
+    expect(store.streakWeeks(DateTime(2026, 7, 22)), 0);
+  });
+
+  test('deleteSession removes the session and persists', () async {
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
+    await store.addSession(
+      sessionFor('push', const [SetLog(weightKg: 40, reps: 8)]),
+    );
+    await store.addSession(
+      sessionFor('pull', const [SetLog(weightKg: 30, reps: 10)]),
+    );
+    expect(store.sessions.length, 2);
+    expect(store.sessions.first.id, isNotNull);
+
+    await store.deleteSession(
+      store.sessions.firstWhere((s) => s.dayKey == 'push'),
+    );
+
+    expect(store.sessions.single.dayKey, 'pull');
+    // Derived stats no longer see the deleted session's sets.
+    expect(store.bestWeightFor('benchPress'), 30);
+
+    final reloaded = await AppStore.open(db);
+    expect(reloaded.sessions.single.dayKey, 'pull');
+  });
+
+  test('exercise notes save, clear, and persist', () async {
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
+    expect(store.noteFor('benchPress'), isNull);
+
+    await store.setExerciseNote('benchPress', '  narrow grip  ');
+    expect(store.noteFor('benchPress'), 'narrow grip');
+
+    final reloaded = await AppStore.open(db);
+    expect(reloaded.noteFor('benchPress'), 'narrow grip');
+
+    // A blank note removes the entry.
+    await reloaded.setExerciseNote('benchPress', '   ');
+    expect(reloaded.noteFor('benchPress'), isNull);
+    expect((await AppStore.open(db)).noteFor('benchPress'), isNull);
+  });
+
+  test('body weight entries add, sort, delete, and persist', () async {
+    final db = await openTestDatabase();
+    final store = await AppStore.open(db);
+    expect(store.bodyWeights, isEmpty);
+
+    await store.addBodyWeight(82.5, date: DateTime(2026, 7, 20));
+    await store.addBodyWeight(83.1, date: DateTime(2026, 7, 6));
+    await store.addBodyWeight(82.0, date: DateTime(2026, 7, 22));
+
+    // Newest first, regardless of insertion order.
+    expect(store.bodyWeights.map((e) => e.weightKg), [82.0, 82.5, 83.1]);
+
+    final reloaded = await AppStore.open(db);
+    expect(reloaded.bodyWeights.map((e) => e.weightKg), [82.0, 82.5, 83.1]);
+
+    await reloaded.deleteBodyWeight(reloaded.bodyWeights.first);
+    expect(reloaded.bodyWeights.map((e) => e.weightKg), [82.5, 83.1]);
+    expect((await AppStore.open(db)).bodyWeights.length, 2);
   });
 
   test('backup export/import round trip', () async {
@@ -255,14 +471,21 @@ void main() {
       sessionFor('upperA', const [SetLog(weightKg: 60, reps: 12)]),
     );
     await source.setUnit(WeightUnit.lb);
+    await source.setExerciseNote('benchPress', 'narrow grip');
+    await source.addBodyWeight(82.5, date: DateTime(2026, 7, 20));
     final backup = source.exportData();
 
     final target = await openTestStore();
+    await target.setExerciseNote('squat', 'old note that must not survive');
+    await target.addBodyWeight(90, date: DateTime(2026, 7, 1));
     await target.importData(backup);
     expect(target.plan!.goal, Goal.loseWeight);
     expect(target.sessions.single.dayKey, 'upperA');
     expect(target.sessions.single.logs.single.sets.single.weightKg, 60);
     expect(target.unit, WeightUnit.lb);
+    expect(target.noteFor('benchPress'), 'narrow grip');
+    expect(target.noteFor('squat'), isNull);
+    expect(target.bodyWeights.single.weightKg, 82.5);
   });
 
   test('import rejects invalid payloads without touching data', () async {

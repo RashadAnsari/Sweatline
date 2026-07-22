@@ -8,14 +8,31 @@ import '../main.dart';
 import '../models.dart';
 import '../widgets/exercise_figure.dart';
 import '../widgets/muscle_diagram.dart';
+import '../widgets/note_card.dart';
+import '../widgets/note_dialog.dart';
 import '../widgets/page_body.dart';
 
 /// Full exercise card: muscle map, equipment, how-to steps, trainer form
-/// tips, and the user's own history for the lift.
+/// tips, the user's own note, and their history for the lift.
 class ExerciseDetailScreen extends StatelessWidget {
   const ExerciseDetailScreen({super.key, required this.exercise});
 
   final Exercise exercise;
+
+  Future<void> _editNote(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final store = StoreScope.of(context);
+    final text = await showNoteDialog(
+      context,
+      title: l10n.myNoteTitle,
+      initialText: store.noteFor(exercise.id) ?? '',
+      hint: l10n.noteHint,
+      saveLabel: l10n.save,
+      cancelLabel: l10n.cancel,
+    );
+    if (text == null) return;
+    await store.setExerciseNote(exercise.id, text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,11 +199,53 @@ class ExerciseDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(l10n.myNoteTitle, style: textTheme.titleLarge),
+                ),
+                TextButton.icon(
+                  onPressed: () => _editNote(context),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: Text(
+                    store.noteFor(exercise.id) == null
+                        ? l10n.addNoteButton
+                        : l10n.editNoteButton,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (store.noteFor(exercise.id) case final String note)
+              NoteCard(text: note)
+            else
+              Text(l10n.noNoteYet, style: textTheme.bodyMedium),
+            const SizedBox(height: 24),
             Text(l10n.yourHistoryTitle, style: textTheme.titleLarge),
             const SizedBox(height: 8),
             if (history.isEmpty)
               Text(l10n.noHistoryYet, style: textTheme.bodyMedium)
-            else
+            else ...[
+              Card(
+                child: ListTile(
+                  leading: Icon(Icons.emoji_events, color: colorScheme.primary),
+                  title: Text(l10n.allTimeBest),
+                  trailing: Text(
+                    l10n.weightWithUnit(
+                      formatKgIn(
+                        store.unit,
+                        history
+                            .map((entry) => entry.$2)
+                            .reduce((a, b) => a > b ? a : b),
+                      ),
+                      unitLabel(l10n, store.unit),
+                    ),
+                    style: textTheme.titleLarge!.copyWith(
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
               for (final (date, weight) in history.reversed)
                 ListTile(
                   dense: true,
@@ -200,6 +259,7 @@ class ExerciseDetailScreen extends StatelessWidget {
                     style: textTheme.titleLarge,
                   ),
                 ),
+            ],
           ],
         ),
       ),

@@ -264,13 +264,69 @@ class _TodayTabState extends State<_TodayTab> {
                   ),
           ),
         ),
+        if (store.streakWeeks() case final int streak when streak > 0) ...[
+          const SizedBox(height: 4),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$streak',
+                      style: textTheme.headlineMedium!.copyWith(
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.statStreak.toUpperCase(),
+                          style: textTheme.labelSmall!.copyWith(
+                            letterSpacing: 2,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(l10n.weekStreakBody, style: textTheme.bodyMedium),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.local_fire_department,
+                    color: colorScheme.primary,
+                    size: 28,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
 }
 
 class _PlannedExerciseTile extends StatelessWidget {
-  const _PlannedExerciseTile({required this.planned, this.onReplace});
+  const _PlannedExerciseTile({
+    super.key,
+    required this.planned,
+    this.onReplace,
+    this.onEdit,
+    this.dragHandle,
+  });
 
   final PlannedExercise planned;
 
@@ -278,10 +334,33 @@ class _PlannedExerciseTile extends StatelessWidget {
   /// the read-only Today preview.
   final VoidCallback? onReplace;
 
+  /// When set, an edit button opens the sets / reps / rest editor.
+  final VoidCallback? onEdit;
+
+  /// Drag handle for reordering within a plan day.
+  final Widget? dragHandle;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final exercise = exerciseById(planned.exerciseId);
+    final actions = <Widget>[
+      if (onEdit != null)
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          icon: const Icon(Icons.tune),
+          tooltip: l10n.editExerciseTooltip,
+          onPressed: onEdit,
+        ),
+      if (onReplace != null)
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          icon: const Icon(Icons.swap_horiz),
+          tooltip: l10n.swapTooltip,
+          onPressed: onReplace,
+        ),
+      ?dragHandle,
+    ];
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
@@ -302,19 +381,9 @@ class _PlannedExerciseTile extends StatelessWidget {
         '${l10n.setsByReps(planned.sets, planned.repsMin, planned.repsMax)} · '
         '${l10n.restInfo(planned.restSeconds)}',
       ),
-      trailing: onReplace == null
+      trailing: actions.isEmpty
           ? const Icon(Icons.chevron_right)
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.swap_horiz),
-                  tooltip: l10n.swapTooltip,
-                  onPressed: onReplace,
-                ),
-                const Icon(Icons.chevron_right),
-              ],
-            ),
+          : Row(mainAxisSize: MainAxisSize.min, children: actions),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => ExerciseDetailScreen(exercise: exercise),
@@ -342,6 +411,29 @@ class _PlanTab extends StatelessWidget {
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
       );
     }
+  }
+
+  Future<void> _editPrescription(
+    BuildContext context,
+    String dayKey,
+    int index,
+    PlannedExercise planned,
+  ) async {
+    final store = StoreScope.of(context);
+    final result = await showModalBottomSheet<_Prescription>(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => _EditPrescriptionSheet(planned: planned),
+    );
+    if (result == null) return;
+    await store.updatePlanPrescription(
+      dayKey,
+      index,
+      sets: result.sets,
+      repsMin: result.repsMin,
+      repsMax: result.repsMax,
+      restSeconds: result.restSeconds,
+    );
   }
 
   Future<void> _replacePlanExercise(
@@ -405,16 +497,46 @@ class _PlanTab extends StatelessWidget {
                       ),
                     ],
                   ),
-                  for (var i = 0; i < day.exercises.length; i++)
-                    _PlannedExerciseTile(
-                      planned: day.exercises[i],
-                      onReplace: () => _replacePlanExercise(
-                        context,
-                        day.key,
-                        i,
-                        day.exercises[i].exerciseId,
-                      ),
-                    ),
+                  ReorderableListView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    buildDefaultDragHandles: false,
+                    onReorder: (oldIndex, newIndex) {
+                      if (newIndex > oldIndex) newIndex--;
+                      store.movePlanExercise(day.key, oldIndex, newIndex);
+                    },
+                    children: [
+                      for (var i = 0; i < day.exercises.length; i++)
+                        _PlannedExerciseTile(
+                          key: ValueKey(
+                            '${day.key}-$i-${day.exercises[i].exerciseId}',
+                          ),
+                          planned: day.exercises[i],
+                          onReplace: () => _replacePlanExercise(
+                            context,
+                            day.key,
+                            i,
+                            day.exercises[i].exerciseId,
+                          ),
+                          onEdit: () => _editPrescription(
+                            context,
+                            day.key,
+                            i,
+                            day.exercises[i],
+                          ),
+                          dragHandle: ReorderableDragStartListener(
+                            index: i,
+                            child: Tooltip(
+                              message: l10n.reorderTooltip,
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 4),
+                                child: Icon(Icons.drag_indicator),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -428,6 +550,170 @@ class _PlanTab extends StatelessWidget {
         ),
         const SizedBox(height: 8),
       ],
+    );
+  }
+}
+
+/// Result of the sets / reps / rest editor.
+class _Prescription {
+  const _Prescription({
+    required this.sets,
+    required this.repsMin,
+    required this.repsMax,
+    required this.restSeconds,
+  });
+
+  final int sets;
+  final int repsMin;
+  final int repsMax;
+  final int restSeconds;
+}
+
+/// Bottom sheet with steppers to adjust a plan slot's sets, rep range, and
+/// rest. The rep bounds push each other so the range can never invert.
+class _EditPrescriptionSheet extends StatefulWidget {
+  const _EditPrescriptionSheet({required this.planned});
+
+  final PlannedExercise planned;
+
+  @override
+  State<_EditPrescriptionSheet> createState() => _EditPrescriptionSheetState();
+}
+
+class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
+  late int _sets = widget.planned.sets;
+  late int _repsMin = widget.planned.repsMin;
+  late int _repsMax = widget.planned.repsMax;
+  late int _restSeconds = widget.planned.restSeconds;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              exerciseById(widget.planned.exerciseId).name,
+              style: textTheme.titleLarge,
+            ),
+            const SizedBox(height: 2),
+            // Live preview in the exact format the plan tiles use, so the
+            // result of the edit is visible before saving.
+            Text(
+              '${l10n.setsByReps(_sets, _repsMin, _repsMax)} · '
+              '${l10n.restInfo(_restSeconds)}',
+              style: textTheme.bodyMedium!.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _StepperRow(
+              label: l10n.editSetsLabel,
+              value: _sets,
+              min: 1,
+              max: 10,
+              onChanged: (value) => setState(() => _sets = value),
+            ),
+            _StepperRow(
+              label: l10n.editRepsMinLabel,
+              value: _repsMin,
+              min: 1,
+              max: 30,
+              onChanged: (value) => setState(() {
+                _repsMin = value;
+                if (_repsMax < value) _repsMax = value;
+              }),
+            ),
+            _StepperRow(
+              label: l10n.editRepsMaxLabel,
+              value: _repsMax,
+              min: 1,
+              max: 30,
+              onChanged: (value) => setState(() {
+                _repsMax = value;
+                if (_repsMin > value) _repsMin = value;
+              }),
+            ),
+            _StepperRow(
+              label: l10n.editRestLabel,
+              value: _restSeconds,
+              min: 15,
+              max: 300,
+              step: 15,
+              onChanged: (value) => setState(() => _restSeconds = value),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).pop(
+                _Prescription(
+                  sets: _sets,
+                  repsMin: _repsMin,
+                  repsMax: _repsMax,
+                  restSeconds: _restSeconds,
+                ),
+              ),
+              icon: const Icon(Icons.check),
+              label: Text(l10n.save),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StepperRow extends StatelessWidget {
+  const _StepperRow({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    this.step = 1,
+    required this.onChanged,
+  });
+
+  final String label;
+  final int value;
+  final int min;
+  final int max;
+  final int step;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(label, style: textTheme.bodyLarge)),
+          IconButton.filledTonal(
+            onPressed: value > min
+                ? () => onChanged((value - step).clamp(min, max))
+                : null,
+            icon: const Icon(Icons.remove),
+          ),
+          SizedBox(
+            width: 56,
+            child: Text(
+              '$value',
+              textAlign: TextAlign.center,
+              style: textTheme.titleLarge,
+            ),
+          ),
+          IconButton.filledTonal(
+            onPressed: value < max
+                ? () => onChanged((value + step).clamp(min, max))
+                : null,
+            icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
     );
   }
 }
