@@ -1,7 +1,7 @@
 name: sweatline
 description: "Personal training app: generates a workout plan, guides you through gym sessions, and tracks progress."
 publish_to: 'none'
-version: 1.4.1+7
+version: 1.5.0+8
 
 environment:
   sdk: ^3.11.0

@@ -4,7 +4,8 @@
 	<dict>
 		<!-- Sweatline runs fully offline. It collects nothing, tracks nobody,
 		     and calls no required-reason APIs from its own code. The bundled
-		     plugins (sqflite_darwin, package_info_plus, wakelock_plus) ship
+		     plugins (sqflite_darwin, package_info_plus, wakelock_plus,
+		     share_plus, flutter_local_notifications, flutter_timezone) ship
 		     their own privacy manifests, which Xcode merges into the report. -->
 		<key>NSPrivacyTracking</key>
 		<false/>

@@ -61,5 +61,11 @@
 		<false/>
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
+		<!-- Sharing the workout summary opens the system share sheet, which
+		     offers "Save Image". iOS runs that action inside this app, so the
+		     key is required or the app crashes when the user taps it. Sweatline
+		     never reads the photo library. -->
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Sweatline saves your workout summary image to Photos when you pick Save Image from the share sheet.</string>
 	</dict>
 </plist>

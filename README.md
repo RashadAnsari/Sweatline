@@ -62,6 +62,12 @@ On Android, download the APK from the
     <td align="center">Rest timer</td>
     <td align="center">Summary</td>
   </tr>
+  <tr>
+    <td><img src="docs/settings-page.png" alt="Settings screen" width="180"></td>
+  </tr>
+  <tr>
+    <td align="center">Settings</td>
+  </tr>
 </table>
 
 ## Features
@@ -175,7 +181,10 @@ boundary.
 All data stays on the device, in a SQLite database inside app-local storage.
 The app has no account system, no analytics, no crash reporting, and no server.
 `INTERNET` is declared only in the debug manifest, so a release build cannot
-make a network request at all. Full text:
+make a network request at all. The only permissions it asks for are
+notifications, if you switch on the daily reminder, and adding an image to your
+photo library, which iOS requires because the share sheet offers "Save Image".
+Full text:
 [rashadansari.github.io/Sweatline/privacy-policy](https://rashadansari.github.io/Sweatline/privacy-policy)
 (source: [docs/privacy-policy.md](docs/privacy-policy.md)).
 
