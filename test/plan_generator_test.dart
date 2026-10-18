@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sweatline/exercise_library.dart';
+import 'package:sweatline/l10n/app_localizations.dart';
+import 'package:sweatline/labels.dart';
 import 'package:sweatline/models.dart';
 import 'package:sweatline/plan_generator.dart';
 
@@ -281,11 +286,31 @@ void main() {
   });
 
   test('library data is complete for every exercise', () {
+    final l10n = lookupAppLocalizations(const Locale('en'));
     for (final exercise in exerciseLibrary) {
       expect(exercise.steps, isNotEmpty, reason: exercise.id);
-      expect(exercise.tips, isNotEmpty, reason: exercise.id);
       expect(exercise.primaryMuscles, isNotEmpty, reason: exercise.id);
       expect(exerciseGroups, contains(exercise.group), reason: exercise.id);
+      // An unmapped key would show raw, since the labels fall back to it.
+      expect(
+        equipmentLabel(l10n, exercise.equipment),
+        isNot(exercise.equipment),
+        reason: exercise.id,
+      );
+      for (final muscle in [
+        ...exercise.primaryMuscles,
+        ...exercise.secondaryMuscles,
+      ]) {
+        expect(muscleLabel(l10n, muscle), isNot(muscle), reason: exercise.id);
+      }
+      if (exercise.media case final String media) {
+        expect(File('assets/exercises/$media.gif').existsSync(), isTrue);
+        expect(File('assets/exercises/thumbs/$media.jpg').existsSync(), isTrue);
+      }
     }
+    expect(
+      exerciseLibrary.map((e) => e.id).toSet(),
+      hasLength(exerciseLibrary.length),
+    );
   });
 }

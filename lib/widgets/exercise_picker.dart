@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../exercise_library.dart';
-import '../exercise_poses.dart';
 import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import 'exercise_figure.dart';
@@ -76,7 +75,7 @@ Future<ExerciseReplacement?> showExercisePicker(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: ExerciseFigure(
-                                illustration: illustrationFor(e.id),
+                                media: e.media,
                                 height: 44,
                                 animate: false,
                               ),

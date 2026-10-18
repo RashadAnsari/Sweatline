@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../exercise_library.dart';
-import '../exercise_poses.dart';
 import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../widgets/exercise_figure.dart';
@@ -84,7 +83,7 @@ class _LibraryTabState extends State<LibraryTab> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: ExerciseFigure(
-                          illustration: illustrationFor(exercise.id),
+                          media: exercise.media,
                           height: 48,
                           animate: false,
                         ),

@@ -94,11 +94,10 @@ On Android, download the APK from the
   dragging, and edit sets, rep range, and rest per exercise. Keep a
   personal note per exercise (seat setting, grip) that shows up
   mid-workout.
-- **Exercise encyclopedia**: 63 exercises with equipment, animated
-  movement pictograms (a figure tweening between start and end position,
-  drawn in code from pose data in `lib/exercise_poses.dart`), muscle maps
-  (front/back diagrams with primary and secondary muscles highlighted),
-  step-by-step instructions, and trainer form cues.
+- **Exercise encyclopedia**: 1,324 exercises with equipment, animated
+  demonstrations, muscle maps (front/back diagrams with primary and
+  secondary muscles highlighted), step-by-step instructions, and trainer
+  form cues on the core lifts.
 - **Progress tracking**: weekly and total stats, a weeks-in-a-row streak,
   per-exercise strength trends, body-weight tracking with a trend line, and
   full session history with the option to delete a mislogged workout.
@@ -113,6 +112,7 @@ On Android, download the APK from the
 
 ```sh
 flutter pub get
+make exercise-media  # fetches the exercise dataset into assets/exercises/
 flutter gen-l10n     # generates lib/l10n/app_localizations*.dart
 flutter run
 ```
@@ -168,7 +168,9 @@ history; plan, in-progress draft, and settings live as rows in a small
 with stable string keys; all user-facing strings go through
 `flutter gen-l10n` (`lib/l10n/app_en.arb`). The exercise library and plan
 templates are code-defined seed data in `lib/exercise_library.dart` and
-`lib/plan_generator.dart`.
+`lib/plan_generator.dart`. Everything outside the core lifts is generated
+into `lib/exercise_data.dart` and `assets/exercises/` by
+`tools/import_exercises.py`.
 
 The store keeps a synchronous public API by loading everything into memory
 once at `AppStore.open` and writing incrementally. The schema version is
@@ -205,3 +207,9 @@ Found a bug, or want an exercise added? Open an
 ## License
 
 [MIT](LICENSE).
+
+Exercise text beyond the core lifts comes from
+[exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset)
+(MIT, Copyright (c) 2026 Hasan Emir Yıldırım). The exercise animations in
+`assets/exercises/` are © [Gym visual](https://gymvisual.com/), used under
+license, and are not covered by this repository's MIT license.

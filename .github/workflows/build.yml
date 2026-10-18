@@ -22,11 +22,15 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.41.1
+          flutter-version: 3.47.7
           cache: true
 
       - name: Install dependencies
         run: flutter pub get
+
+      # The exercise media is not in git; the tests check it exists.
+      - name: Generate exercise data and media
+        run: make exercise-media
 
       # Format is checked before gen-l10n so generated (untracked) sources
       # cannot fail the check.
