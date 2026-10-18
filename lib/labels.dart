@@ -47,10 +47,16 @@ String muscleLabel(AppLocalizations l10n, String key) => switch (key) {
 
 String equipmentLabel(AppLocalizations l10n, String key) => switch (key) {
   'barbell' => l10n.equipmentBarbell,
+  'ezBar' => l10n.equipmentEzBar,
+  'smithMachine' => l10n.equipmentSmithMachine,
   'dumbbell' => l10n.equipmentDumbbell,
+  'kettlebell' => l10n.equipmentKettlebell,
   'cable' => l10n.equipmentCable,
   'machine' => l10n.equipmentMachine,
+  'band' => l10n.equipmentBand,
+  'ball' => l10n.equipmentBall,
   'bodyweight' => l10n.equipmentBodyweight,
+  'other' => l10n.equipmentOther,
   _ => key,
 };
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../exercise_library.dart';
-import '../exercise_poses.dart';
 import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
@@ -371,7 +370,7 @@ class _PlannedExerciseTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
         child: ExerciseFigure(
-          illustration: illustrationFor(exercise.id),
+          media: exercise.media,
           height: 48,
           animate: false,
         ),
@@ -501,10 +500,8 @@ class _PlanTab extends StatelessWidget {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     buildDefaultDragHandles: false,
-                    onReorder: (oldIndex, newIndex) {
-                      if (newIndex > oldIndex) newIndex--;
-                      store.movePlanExercise(day.key, oldIndex, newIndex);
-                    },
+                    onReorderItem: (oldIndex, newIndex) =>
+                        store.movePlanExercise(day.key, oldIndex, newIndex),
                     children: [
                       for (var i = 0; i < day.exercises.length; i++)
                         _PlannedExerciseTile(

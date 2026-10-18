@@ -10,6 +10,17 @@ lint:
 	flutter analyze
 	dart format --set-exit-if-changed lib/
 
+# Fetch the pinned exercises-dataset commit and generate lib/exercise_data.dart
+# plus assets/exercises/ (Gym visual media, licensed to this app, kept out of
+# git). Run once after cloning; CI runs it before testing.
+EXERCISES_DATASET_COMMIT = 7455efae41b330c265e7cd4b78dfa848e7ce5ebd
+exercise-media:
+	rm -rf build/exercises-dataset
+	git init -q build/exercises-dataset
+	git -C build/exercises-dataset fetch -q --depth 1 https://github.com/hasaneyldrm/exercises-dataset $(EXERCISES_DATASET_COMMIT)
+	git -C build/exercises-dataset checkout -q FETCH_HEAD
+	python3 -I tools/import_exercises.py build/exercises-dataset
+
 # Run the app on a connected device or simulator
 run:
 	flutter run

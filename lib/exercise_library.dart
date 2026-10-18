@@ -1,14 +1,18 @@
+import 'exercise_data.dart';
 import 'models.dart';
 
-/// Built-in exercise library. IDs are stable and referenced by plans and
-/// logs. Names, steps, and tips are seed data, kept out of the ARB files.
-const List<Exercise> exerciseLibrary = [
+/// Hand-written exercises the plan generator programs. Their IDs predate the
+/// dataset and stay stable because plans and logs reference them. Each one
+/// replaces its dataset twin (same [Exercise.media]) with simpler copy and
+/// trainer tips.
+const List<Exercise> _curatedExercises = [
   // ----- Chest -----
   Exercise(
     id: 'benchPress',
     name: 'Barbell Bench Press',
     group: 'chest',
     equipment: 'barbell',
+    media: '0025',
     primaryMuscles: ['chest'],
     secondaryMuscles: ['shoulders', 'triceps'],
     isCompound: true,
@@ -29,6 +33,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Incline Barbell Press',
     group: 'chest',
     equipment: 'barbell',
+    media: '0047',
     primaryMuscles: ['chest'],
     secondaryMuscles: ['shoulders', 'triceps'],
     isCompound: true,
@@ -48,6 +53,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Dumbbell Bench Press',
     group: 'chest',
     equipment: 'dumbbell',
+    media: '0289',
     primaryMuscles: ['chest'],
     secondaryMuscles: ['shoulders', 'triceps'],
     isCompound: true,
@@ -67,6 +73,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Incline Dumbbell Press',
     group: 'chest',
     equipment: 'dumbbell',
+    media: '0314',
     primaryMuscles: ['chest'],
     secondaryMuscles: ['shoulders', 'triceps'],
     isCompound: true,
@@ -86,6 +93,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Cable Chest Fly',
     group: 'chest',
     equipment: 'cable',
+    media: '0227',
     primaryMuscles: ['chest'],
     secondaryMuscles: ['shoulders'],
     steps: [
@@ -104,6 +112,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Pec Deck Machine',
     group: 'chest',
     equipment: 'machine',
+    media: '0596',
     primaryMuscles: ['chest'],
     steps: [
       'Set the seat so the handles are at chest height.',
@@ -121,6 +130,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Push-Up',
     group: 'chest',
     equipment: 'bodyweight',
+    media: '0662',
     primaryMuscles: ['chest'],
     secondaryMuscles: ['shoulders', 'triceps', 'abs'],
     isCompound: true,
@@ -140,6 +150,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Chest Dip',
     group: 'chest',
     equipment: 'bodyweight',
+    media: '0251',
     primaryMuscles: ['chest', 'triceps'],
     secondaryMuscles: ['shoulders'],
     isCompound: true,
@@ -161,6 +172,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Deadlift',
     group: 'back',
     equipment: 'barbell',
+    media: '0032',
     primaryMuscles: ['lowerBack', 'glutes', 'hamstrings'],
     secondaryMuscles: ['lats', 'traps', 'forearms', 'quads'],
     isCompound: true,
@@ -182,6 +194,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Pull-Up',
     group: 'back',
     equipment: 'bodyweight',
+    media: '0652',
     primaryMuscles: ['lats'],
     secondaryMuscles: ['biceps', 'upperBack', 'forearms'],
     isCompound: true,
@@ -200,6 +213,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Chin-Up',
     group: 'back',
     equipment: 'bodyweight',
+    media: '1326',
     primaryMuscles: ['lats', 'biceps'],
     secondaryMuscles: ['upperBack', 'forearms'],
     isCompound: true,
@@ -218,6 +232,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Lat Pulldown',
     group: 'back',
     equipment: 'cable',
+    media: '0198',
     primaryMuscles: ['lats'],
     secondaryMuscles: ['biceps', 'upperBack'],
     isCompound: true,
@@ -237,6 +252,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Barbell Row',
     group: 'back',
     equipment: 'barbell',
+    media: '0027',
     primaryMuscles: ['upperBack', 'lats'],
     secondaryMuscles: ['biceps', 'lowerBack', 'forearms'],
     isCompound: true,
@@ -256,6 +272,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'One-Arm Dumbbell Row',
     group: 'back',
     equipment: 'dumbbell',
+    media: '0292',
     primaryMuscles: ['lats', 'upperBack'],
     secondaryMuscles: ['biceps', 'forearms'],
     isCompound: true,
@@ -275,6 +292,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Seated Cable Row',
     group: 'back',
     equipment: 'cable',
+    media: '0861',
     primaryMuscles: ['upperBack', 'lats'],
     secondaryMuscles: ['biceps'],
     isCompound: true,
@@ -294,6 +312,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'T-Bar Row',
     group: 'back',
     equipment: 'barbell',
+    media: '0606',
     primaryMuscles: ['upperBack', 'lats'],
     secondaryMuscles: ['biceps', 'lowerBack'],
     isCompound: true,
@@ -313,6 +332,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Straight-Arm Pulldown',
     group: 'back',
     equipment: 'cable',
+    media: '0238',
     primaryMuscles: ['lats'],
     secondaryMuscles: ['triceps', 'abs'],
     steps: [
@@ -331,6 +351,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Back Extension',
     group: 'back',
     equipment: 'bodyweight',
+    media: '0489',
     primaryMuscles: ['lowerBack', 'glutes'],
     secondaryMuscles: ['hamstrings'],
     steps: [
@@ -349,6 +370,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Dumbbell Shrug',
     group: 'back',
     equipment: 'dumbbell',
+    media: '0406',
     primaryMuscles: ['traps'],
     secondaryMuscles: ['forearms'],
     steps: [
@@ -368,6 +390,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Overhead Press',
     group: 'shoulders',
     equipment: 'barbell',
+    media: '1456',
     primaryMuscles: ['shoulders'],
     secondaryMuscles: ['triceps', 'traps', 'abs'],
     isCompound: true,
@@ -387,6 +410,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Seated Dumbbell Press',
     group: 'shoulders',
     equipment: 'dumbbell',
+    media: '0405',
     primaryMuscles: ['shoulders'],
     secondaryMuscles: ['triceps', 'traps'],
     isCompound: true,
@@ -405,6 +429,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Arnold Press',
     group: 'shoulders',
     equipment: 'dumbbell',
+    media: '2137',
     primaryMuscles: ['shoulders'],
     secondaryMuscles: ['triceps'],
     steps: [
@@ -422,6 +447,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Dumbbell Lateral Raise',
     group: 'shoulders',
     equipment: 'dumbbell',
+    media: '0334',
     primaryMuscles: ['shoulders'],
     steps: [
       'Stand up straight with a light dumbbell in each hand at your sides.',
@@ -438,6 +464,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Dumbbell Front Raise',
     group: 'shoulders',
     equipment: 'dumbbell',
+    media: '0310',
     primaryMuscles: ['shoulders'],
     steps: [
       'Hold a dumbbell in each hand in front of your thighs.',
@@ -454,6 +481,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Rear Delt Fly',
     group: 'shoulders',
     equipment: 'dumbbell',
+    media: '0378',
     primaryMuscles: ['shoulders', 'upperBack'],
     steps: [
       'Bend forward until your upper body is almost level with the floor.',
@@ -471,6 +499,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Cable Face Pull',
     group: 'shoulders',
     equipment: 'cable',
+    media: '0203',
     primaryMuscles: ['shoulders', 'upperBack'],
     secondaryMuscles: ['traps'],
     steps: [
@@ -489,6 +518,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Cable Upright Row',
     group: 'shoulders',
     equipment: 'cable',
+    media: '0246',
     primaryMuscles: ['shoulders', 'traps'],
     secondaryMuscles: ['biceps'],
     steps: [
@@ -508,6 +538,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Dumbbell Bicep Curl',
     group: 'arms',
     equipment: 'dumbbell',
+    media: '0294',
     primaryMuscles: ['biceps'],
     secondaryMuscles: ['forearms'],
     steps: [
@@ -525,6 +556,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Barbell Curl',
     group: 'arms',
     equipment: 'barbell',
+    media: '0031',
     primaryMuscles: ['biceps'],
     secondaryMuscles: ['forearms'],
     steps: [
@@ -542,6 +574,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Hammer Curl',
     group: 'arms',
     equipment: 'dumbbell',
+    media: '0313',
     primaryMuscles: ['biceps', 'forearms'],
     steps: [
       'Hold the dumbbells at your sides with your palms facing your body.',
@@ -558,6 +591,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Preacher Curl',
     group: 'arms',
     equipment: 'machine',
+    media: '0592',
     primaryMuscles: ['biceps'],
     steps: [
       'Sit with the backs of your upper arms flat on the pad.',
@@ -574,6 +608,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Concentration Curl',
     group: 'arms',
     equipment: 'dumbbell',
+    media: '0297',
     primaryMuscles: ['biceps'],
     steps: [
       'Sit on a bench and rest your elbow against your inner thigh.',
@@ -591,6 +626,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Cable Curl',
     group: 'arms',
     equipment: 'cable',
+    media: '0868',
     primaryMuscles: ['biceps'],
     secondaryMuscles: ['forearms'],
     steps: [
@@ -608,6 +644,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Tricep Rope Pushdown',
     group: 'arms',
     equipment: 'cable',
+    media: '0200',
     primaryMuscles: ['triceps'],
     steps: [
       'Face a high pulley with a rope handle, elbows at your sides.',
@@ -624,6 +661,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Skull Crusher',
     group: 'arms',
     equipment: 'barbell',
+    media: '0060',
     primaryMuscles: ['triceps'],
     steps: [
       'Lie on a bench and hold the bar over your chest with a narrow grip.',
@@ -640,6 +678,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Overhead Tricep Extension',
     group: 'arms',
     equipment: 'dumbbell',
+    media: '2188',
     primaryMuscles: ['triceps'],
     steps: [
       'Hold one dumbbell with both hands above your head.',
@@ -656,6 +695,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Close-Grip Bench Press',
     group: 'arms',
     equipment: 'barbell',
+    media: '0030',
     primaryMuscles: ['triceps'],
     secondaryMuscles: ['chest', 'shoulders'],
     isCompound: true,
@@ -676,6 +716,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Barbell Back Squat',
     group: 'legs',
     equipment: 'barbell',
+    media: '0043',
     primaryMuscles: ['quads', 'glutes'],
     secondaryMuscles: ['hamstrings', 'lowerBack', 'abs'],
     isCompound: true,
@@ -696,6 +737,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Front Squat',
     group: 'legs',
     equipment: 'barbell',
+    media: '0042',
     primaryMuscles: ['quads'],
     secondaryMuscles: ['glutes', 'abs', 'upperBack'],
     isCompound: true,
@@ -715,6 +757,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Goblet Squat',
     group: 'legs',
     equipment: 'dumbbell',
+    media: '1760',
     primaryMuscles: ['quads', 'glutes'],
     secondaryMuscles: ['abs'],
     isCompound: true,
@@ -733,6 +776,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Leg Press',
     group: 'legs',
     equipment: 'machine',
+    media: '0739',
     primaryMuscles: ['quads', 'glutes'],
     secondaryMuscles: ['hamstrings'],
     isCompound: true,
@@ -751,6 +795,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Hack Squat',
     group: 'legs',
     equipment: 'machine',
+    media: '0743',
     primaryMuscles: ['quads'],
     secondaryMuscles: ['glutes'],
     isCompound: true,
@@ -769,6 +814,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Romanian Deadlift',
     group: 'legs',
     equipment: 'barbell',
+    media: '0085',
     primaryMuscles: ['hamstrings', 'glutes'],
     secondaryMuscles: ['lowerBack', 'forearms'],
     isCompound: true,
@@ -788,6 +834,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Lying Leg Curl',
     group: 'legs',
     equipment: 'machine',
+    media: '0586',
     primaryMuscles: ['hamstrings'],
     steps: [
       'Lie face down with the pad against your lower calves.',
@@ -804,6 +851,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Leg Extension',
     group: 'legs',
     equipment: 'machine',
+    media: '0585',
     primaryMuscles: ['quads'],
     steps: [
       'Sit with the pad on your lower shins, knees lined up with the machine.',
@@ -820,6 +868,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Walking Lunge',
     group: 'legs',
     equipment: 'dumbbell',
+    media: '1460',
     primaryMuscles: ['quads', 'glutes'],
     secondaryMuscles: ['hamstrings', 'abs'],
     isCompound: true,
@@ -839,6 +888,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Bulgarian Split Squat',
     group: 'legs',
     equipment: 'dumbbell',
+    media: '0410',
     primaryMuscles: ['quads', 'glutes'],
     secondaryMuscles: ['hamstrings'],
     isCompound: true,
@@ -858,6 +908,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Barbell Hip Thrust',
     group: 'legs',
     equipment: 'barbell',
+    media: '1409',
     primaryMuscles: ['glutes'],
     secondaryMuscles: ['hamstrings'],
     isCompound: true,
@@ -877,6 +928,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Standing Calf Raise',
     group: 'legs',
     equipment: 'machine',
+    media: '0605',
     primaryMuscles: ['calves'],
     steps: [
       'Stand with the front of your feet on the platform and your heels hanging off.',
@@ -893,6 +945,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Seated Calf Raise',
     group: 'legs',
     equipment: 'machine',
+    media: '0594',
     primaryMuscles: ['calves'],
     steps: [
       'Sit with the pads on your knees and the front of your feet on the platform.',
@@ -947,6 +1000,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Crunch',
     group: 'core',
     equipment: 'bodyweight',
+    media: '0274',
     primaryMuscles: ['abs'],
     steps: [
       'Lie on your back with your knees bent and your hands lightly behind your head.',
@@ -963,6 +1017,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Cable Crunch',
     group: 'core',
     equipment: 'cable',
+    media: '0175',
     primaryMuscles: ['abs'],
     steps: [
       'Kneel below a high pulley and hold the rope beside your head.',
@@ -979,6 +1034,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Hanging Leg Raise',
     group: 'core',
     equipment: 'bodyweight',
+    media: '0472',
     primaryMuscles: ['abs'],
     secondaryMuscles: ['obliques', 'forearms'],
     steps: [
@@ -996,6 +1052,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Russian Twist',
     group: 'core',
     equipment: 'bodyweight',
+    media: '0687',
     primaryMuscles: ['obliques'],
     secondaryMuscles: ['abs'],
     steps: [
@@ -1013,6 +1070,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Ab Wheel Rollout',
     group: 'core',
     equipment: 'bodyweight',
+    media: '0857',
     primaryMuscles: ['abs'],
     secondaryMuscles: ['obliques', 'lats', 'shoulders'],
     steps: [
@@ -1030,6 +1088,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Dead Bug',
     group: 'core',
     equipment: 'bodyweight',
+    media: '0276',
     primaryMuscles: ['abs'],
     steps: [
       'Lie on your back with your arms up and your knees bent at 90 degrees over your hips.',
@@ -1048,6 +1107,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Treadmill Run',
     group: 'cardio',
     equipment: 'machine',
+    media: '0685',
     isTimed: true,
     primaryMuscles: ['quads', 'hamstrings', 'calves'],
     secondaryMuscles: ['glutes'],
@@ -1085,6 +1145,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Stationary Bike',
     group: 'cardio',
     equipment: 'machine',
+    media: '2138',
     isTimed: true,
     primaryMuscles: ['quads'],
     secondaryMuscles: ['hamstrings', 'calves', 'glutes'],
@@ -1103,6 +1164,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Jump Rope',
     group: 'cardio',
     equipment: 'bodyweight',
+    media: '2612',
     isTimed: true,
     primaryMuscles: ['calves'],
     secondaryMuscles: ['quads', 'shoulders', 'forearms'],
@@ -1122,6 +1184,7 @@ const List<Exercise> exerciseLibrary = [
     name: 'Burpee',
     group: 'cardio',
     equipment: 'bodyweight',
+    media: '1160',
     primaryMuscles: ['quads', 'chest'],
     secondaryMuscles: ['abs', 'shoulders', 'triceps'],
     isCompound: true,
@@ -1136,6 +1199,19 @@ const List<Exercise> exerciseLibrary = [
     ],
   ),
 ];
+
+/// Built-in exercise library: the curated exercises plus everything else in
+/// the imported dataset (`exercise_data.dart`), sorted by name. IDs are
+/// stable and referenced by plans and logs. Names, steps, and tips are seed
+/// data, kept out of the ARB files.
+final List<Exercise> exerciseLibrary = () {
+  final curatedMedia = {for (final e in _curatedExercises) e.media};
+  return [
+    ..._curatedExercises,
+    for (final e in datasetExercises)
+      if (!curatedMedia.contains(e.media)) e,
+  ]..sort((a, b) => a.name.compareTo(b.name));
+}();
 
 final Map<String, Exercise> _byId = {for (final e in exerciseLibrary) e.id: e};
 

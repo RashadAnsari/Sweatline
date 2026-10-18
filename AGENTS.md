@@ -9,7 +9,15 @@ architecture overview.
   `lib/l10n/app_en.arb`, then run `flutter gen-l10n`. Never hardcode UI
   text in widgets.
 - **Seed data is the exception**: exercise names, how-to steps, and trainer
-  tips live in `lib/exercise_library.dart` as data, not in ARB files.
+  tips live in Dart as data, not in ARB files. The hand-written exercises the
+  plan generator uses are in `lib/exercise_library.dart`; the rest come from
+  [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset) via
+  `make exercise-media` (pinned commit, runs `tools/import_exercises.py`),
+  which writes `lib/exercise_data.dart` and `assets/exercises/`. Never edit
+  those by hand, and never commit `assets/exercises/`: the media is licensed
+  for the app build, not for redistribution in this repo.
+  The Gym visual animations are licensed to this app and must keep the
+  `mediaAttribution` line wherever they animate.
 - **Stable keys, localized labels**: day keys (`push`, `lowerA`), muscle
   keys (`quads`), equipment keys, and enum names are stored in
   persistence; display labels come from `lib/labels.dart`. Never persist a

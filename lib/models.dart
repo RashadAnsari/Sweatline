@@ -15,10 +15,11 @@ class Exercise {
     required this.name,
     required this.group,
     required this.equipment,
+    this.media,
     required this.primaryMuscles,
     this.secondaryMuscles = const [],
     required this.steps,
-    required this.tips,
+    this.tips = const [],
     this.isCompound = false,
     this.isTimed = false,
   });
@@ -33,8 +34,13 @@ class Exercise {
   /// cardio.
   final String group;
 
-  /// Stable equipment key: barbell, dumbbell, cable, machine, bodyweight.
+  /// Stable equipment key: barbell, ezBar, smithMachine, dumbbell,
+  /// kettlebell, cable, machine, band, ball, bodyweight, other.
   final String equipment;
+
+  /// Dataset ID of the bundled Gym visual animation and thumbnail in
+  /// `assets/exercises/`, or null when the dataset has no matching movement.
+  final String? media;
 
   /// Granular muscle keys for the muscle diagram: chest, lats, upperBack,
   /// lowerBack, traps, shoulders, biceps, triceps, forearms, abs, obliques,

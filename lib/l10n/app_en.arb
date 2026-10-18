@@ -74,6 +74,16 @@
   "equipmentCable": "Cable",
   "equipmentMachine": "Machine",
   "equipmentBodyweight": "Bodyweight",
+  "equipmentEzBar": "EZ bar",
+  "equipmentSmithMachine": "Smith machine",
+  "equipmentKettlebell": "Kettlebell",
+  "equipmentBand": "Resistance band",
+  "equipmentBall": "Exercise ball",
+  "equipmentOther": "Other",
+  "mediaAttribution": "Animation © Gym visual · gymvisual.com",
+  "@mediaAttribution": {
+    "description": "Copyright line required by the license for the exercise animations. Keep the name and website."
+  },
 
   "tabToday": "Today",
   "tabPlan": "Plan",

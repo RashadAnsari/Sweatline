@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../exercise_poses.dart';
 import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
@@ -57,10 +56,7 @@ class ExerciseDetailScreen extends StatelessWidget {
                 child: Semantics(
                   image: true,
                   label: exercise.name,
-                  child: ExerciseFigure(
-                    illustration: illustrationFor(exercise.id),
-                    height: 170,
-                  ),
+                  child: ExerciseFigure(media: exercise.media, height: 170),
                 ),
               ),
             ),
@@ -161,43 +157,45 @@ class ExerciseDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
-            const SizedBox(height: 12),
-            Text(l10n.trainerTipsTitle, style: textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Card(
-              color: colorScheme.secondaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (final tip in exercise.tips)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.tips_and_updates,
-                              size: 18,
-                              color: colorScheme.onSecondaryContainer,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                tip,
-                                style: textTheme.bodyMedium!.copyWith(
-                                  color: colorScheme.onSecondaryContainer,
+            if (exercise.tips.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(l10n.trainerTipsTitle, style: textTheme.titleLarge),
+              const SizedBox(height: 8),
+              Card(
+                color: colorScheme.secondaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final tip in exercise.tips)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.tips_and_updates,
+                                size: 18,
+                                color: colorScheme.onSecondaryContainer,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  tip,
+                                  style: textTheme.bodyMedium!.copyWith(
+                                    color: colorScheme.onSecondaryContainer,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
+            ],
             const SizedBox(height: 24),
             Row(
               children: [

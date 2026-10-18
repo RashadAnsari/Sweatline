@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../exercise_library.dart';
-import '../exercise_poses.dart';
 import '../l10n/app_localizations.dart';
 import '../labels.dart';
 import '../main.dart';
@@ -551,7 +550,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
               image: true,
               label: l10n.warmupTitle,
               child: ExerciseFigure(
-                illustration: illustrationFor('jumpRope'),
+                media: exerciseById('jumpRope').media,
                 height: 150,
               ),
             ),
@@ -726,7 +725,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
               label: exercise.name,
               child: ExerciseFigure(
                 key: ValueKey(_planned.exerciseId),
-                illustration: illustrationFor(_planned.exerciseId),
+                media: exercise.media,
                 height: 150,
               ),
             ),
